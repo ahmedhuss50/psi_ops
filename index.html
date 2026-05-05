@@ -2240,7 +2240,7 @@ async function apiAll(path, pageSize = 1000) {
 // LOAD DATA
 // =====================================================
 async function loadAll() {
-  const [jobs, intakes, messages, crews, fleets, requests, parts, processStages] = await Promise.all([
+  const [jobs, intakes, messages, crews, fleets, requests, parts, processStages, customers] = await Promise.all([
     apiAll('jobs?select=*&order=updated_at.desc'),                                // paginated — ALL jobs
     api('intakes?select=*&status=in.(new,clarifying)&order=created_at.desc&limit=200'),
     api('messages?select=*&order=received_at.desc&limit=500'),
@@ -2249,6 +2249,7 @@ async function loadAll() {
     api('automation_requests?select=*&order=created_at.desc&limit=50'),
     apiAll('parts_inventory?select=*'),                                            // paginated — ALL parts
     api('process_stages?select=*&order=position.asc'),
+    api('customers?select=*&order=name.asc'),                                      // ALL customers (book of business)
   ]);
 
   if (jobs) state.jobs = jobs;
@@ -2259,6 +2260,7 @@ async function loadAll() {
   state.requests = requests || [];
   state.parts = parts || [];
   state.processStages = processStages || [];
+  state.customers = customers || [];
 
   document.getElementById('connDot').className = 'dot live';
   document.getElementById('connText').textContent = 'Connected';
@@ -3214,12 +3216,18 @@ function renderCustomersTable() {
 
   const search = (document.getElementById('customerSearch')?.value || '').toLowerCase();
 
-  // Aggregate stats per customer (excluding PSI / unknown)
+  // Start with the full book of business (customers table)
   const stats = {};
+  (state.customers || []).forEach(c => {
+    if (!isCustomerName(c.name)) return;
+    stats[c.name] = { name: c.name, active: 0, completed: 0, intakes: 0, lastActivity: null, in_book: true };
+  });
+
+  // Add stats from jobs (and pick up any customer not in the book)
   state.jobs.forEach(j => {
     if (!isCustomerName(j.customer_name)) return;
     const key = j.customer_name;
-    if (!stats[key]) stats[key] = { name: key, active: 0, completed: 0, intakes: 0, lastActivity: null };
+    if (!stats[key]) stats[key] = { name: key, active: 0, completed: 0, intakes: 0, lastActivity: null, in_book: false };
     if (['completed', 'cancelled'].includes(j.status)) stats[key].completed++;
     else stats[key].active++;
     const upd = j.updated_at || j.created_at;
@@ -3230,7 +3238,7 @@ function renderCustomersTable() {
   state.intakes.forEach(i => {
     if (!isCustomerName(i.customer_name)) return;
     const key = i.customer_name;
-    if (!stats[key]) stats[key] = { name: key, active: 0, completed: 0, intakes: 0, lastActivity: null };
+    if (!stats[key]) stats[key] = { name: key, active: 0, completed: 0, intakes: 0, lastActivity: null, in_book: false };
     stats[key].intakes++;
   });
 

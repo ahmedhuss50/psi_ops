@@ -352,11 +352,27 @@
     padding: 32px 16px; text-align: center; color: var(--text-subtle); font-size: 14px;
   }
 
-  /* Fullscreen mode */
-  body.display-fullscreen aside.sidebar { display: none; }
-  body.display-fullscreen main { padding: 16px; }
-  body.display-fullscreen .display-card-num { font-size: 28px; }
-  body.display-fullscreen #display .page-header h1 { font-size: 28px; }
+  /* Fullscreen mode — true edge-to-edge shop floor TV view */
+  body.display-fullscreen { overflow: hidden; }
+  body.display-fullscreen aside.sidebar,
+  body.display-fullscreen #askFab,
+  body.display-fullscreen .ask-panel,
+  body.display-fullscreen #display .page-header,
+  body.display-fullscreen .display-settings { display: none !important; }
+  body.display-fullscreen .app { display: block; }
+  body.display-fullscreen main { padding: 12px; max-width: 100vw; }
+  body.display-fullscreen #display { display: block !important; height: 100vh; }
+  body.display-fullscreen .display-toolbar {
+    margin-bottom: 12px; padding: 14px 20px;
+  }
+  body.display-fullscreen .display-clock { font-size: 32px; }
+  body.display-fullscreen .display-board { gap: 12px; }
+  body.display-fullscreen .display-col { min-height: calc(100vh - 130px); }
+  body.display-fullscreen .display-card { padding: 14px 16px; }
+  body.display-fullscreen .display-card-num { font-size: 24px; }
+  body.display-fullscreen .display-card-meta { font-size: 14px; }
+  body.display-fullscreen .display-col-title { font-size: 18px; }
+  body.display-fullscreen .display-col-count { font-size: 16px; padding: 6px 14px; }
 
   /* Theme: high contrast */
   .display-board.theme-hc {
@@ -1348,7 +1364,6 @@
     <nav class="sidenav">
       <a class="navlink active" data-tab="overview"><span class="icon">📊</span> Overview</a>
       <a class="navlink" data-tab="display"><span class="icon">📺</span> Shop Display</a>
-      <a class="navlink" data-tab="shop"><span class="icon">🏭</span> Shop Floor</a>
       <a class="navlink" data-tab="trends"><span class="icon">📈</span> Trends</a>
       <a class="navlink" data-tab="comms"><span class="icon">📨</span> Communications <span class="badge" id="badgeComms">0</span></a>
       <a class="navlink" data-tab="jobs"><span class="icon">🛠️</span> Jobs <span class="badge" id="badgeJobs">0</span></a>
@@ -2760,7 +2775,16 @@ function toggleFullscreen() {
   } else {
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
   }
+  renderDisplay();  // re-render to apply top-5 cap or remove it
 }
+
+// Also re-render if user exits fullscreen via Esc key
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) {
+    document.body.classList.remove('display-fullscreen');
+    renderDisplay();
+  }
+});
 
 function updateDisplayClock() {
   const el = document.getElementById('displayTime');
@@ -2830,20 +2854,37 @@ function renderDisplay() {
     completed: '✓ Just Completed',
   };
 
-  board.innerHTML = visibleCols.map(c => `
-    <div class="display-col">
-      <div class="display-col-header ${c}">
-        <div class="display-col-title">${colTitles[c]}</div>
-        <div class="display-col-count">${cols[c].length}</div>
+  // In fullscreen, cap each column at top 5 so they fit on a TV
+  const isFullscreen = document.body.classList.contains('display-fullscreen');
+  const cardCap = isFullscreen ? 5 : Infinity;
+
+  const emptyMsg = (c) => {
+    if (c === 'completed') return 'Nothing completed yet';
+    if (c === 'on_hold') return 'All clear';
+    if (c === 'pending') return 'Nothing incoming';
+    if (c === 'qc_review') return 'Nothing in QC';
+    return 'No active work';
+  };
+
+  board.innerHTML = visibleCols.map(c => {
+    const items = cols[c].slice(0, cardCap);
+    const overflow = cols[c].length - items.length;
+    return `
+      <div class="display-col">
+        <div class="display-col-header ${c}">
+          <div class="display-col-title">${colTitles[c]}</div>
+          <div class="display-col-count">${cols[c].length}</div>
+        </div>
+        <div class="display-col-body">
+          ${cols[c].length === 0
+            ? `<div class="display-empty">${emptyMsg(c)}</div>`
+            : items.map(j => renderDisplayCard(j, c)).join('') +
+              (overflow > 0 ? `<div class="display-empty" style="font-style: italic;">+ ${overflow} more</div>` : '')
+          }
+        </div>
       </div>
-      <div class="display-col-body">
-        ${cols[c].length === 0
-          ? '<div class="display-empty">' + (c === 'completed' ? 'Nothing completed yet' : c === 'on_hold' ? 'All clear' : c === 'pending' ? 'Nothing incoming' : 'No active work') + '</div>'
-          : cols[c].map(j => renderDisplayCard(j, c)).join('')
-        }
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function renderDisplayCard(job, column) {
@@ -2891,8 +2932,27 @@ function renderDisplayCard(job, column) {
       </div>`;
   }
 
+  // Priority badge color
+  const priority = (job.priority || '').toLowerCase();
+  const priorityBadge = (() => {
+    if (priority === 'urgent') return '<span style="display:inline-block;background:#dc2626;color:white;padding:2px 8px;border-radius:4px;font-weight:700;font-size:11px;letter-spacing:0.04em;">🔥 URGENT</span>';
+    if (priority === 'high') return '<span style="display:inline-block;background:#f59e0b;color:white;padding:2px 8px;border-radius:4px;font-weight:700;font-size:11px;letter-spacing:0.04em;">HIGH</span>';
+    if (priority === 'low') return '<span style="display:inline-block;background:#94a3b8;color:white;padding:2px 8px;border-radius:4px;font-weight:600;font-size:11px;">LOW</span>';
+    return '';
+  })();
+
+  // Bay badge
+  const bayBadge = job.bay
+    ? `<span style="display:inline-block;background:#0f172a;color:white;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;letter-spacing:0.05em;">BAY ${escapeHtml(String(job.bay))}</span>`
+    : '';
+
+  const badges = (bayBadge || priorityBadge)
+    ? `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">${bayBadge}${priorityBadge}</div>`
+    : '';
+
   return `
     <div class="display-card ${sizeClass} ${urgencyClass}" onclick="openEditJob('${job.id}')">
+      ${badges}
       <div class="display-card-num">${escapeHtml(job.job_number || '(no #)')}</div>
       <div class="display-card-meta">${escapeHtml(job.customer_name || '?')}${job.job_type ? ' · ' + escapeHtml(job.job_type) : ''}</div>
       ${fleet ? `<span class="display-card-fleet">${escapeHtml(fleet)}</span>` : ''}
@@ -3030,8 +3090,16 @@ function openEditJob(id) {
         </div>
         <div class="form-row">
           <div class="form-field">
-            <label>Address</label>
-            <input class="input" id="ej_address" value="${escapeAttr(job.address || '')}" />
+            <label>Bay</label>
+            <select class="input" id="ej_bay">
+              <option value=""${!job.bay ? ' selected' : ''}>— Unassigned —</option>
+              <option value="1"${job.bay == '1' ? ' selected' : ''}>Bay 1</option>
+              <option value="2"${job.bay == '2' ? ' selected' : ''}>Bay 2</option>
+              <option value="3"${job.bay == '3' ? ' selected' : ''}>Bay 3</option>
+              <option value="4"${job.bay == '4' ? ' selected' : ''}>Bay 4</option>
+              <option value="5"${job.bay == '5' ? ' selected' : ''}>Bay 5</option>
+              <option value="6"${job.bay == '6' ? ' selected' : ''}>Bay 6</option>
+            </select>
           </div>
           <div class="form-field">
             <label>Priority</label>
@@ -3043,6 +3111,10 @@ function openEditJob(id) {
               <option value="urgent"${job.priority === 'urgent' ? ' selected' : ''}>Urgent</option>
             </select>
           </div>
+        </div>
+        <div class="form-field">
+          <label>Address</label>
+          <input class="input" id="ej_address" value="${escapeAttr(job.address || '')}" />
         </div>
         <div class="form-field">
           <label>Notes</label>
@@ -3084,6 +3156,7 @@ async function saveJobEdit(id) {
     job_type: get('ej_job_type') || null,
     address: get('ej_address') || null,
     priority: get('ej_priority') || null,
+    bay: get('ej_bay') || null,
     notes: get('ej_notes') || null,
     blocker_reason: get('ej_blocker_reason') || null,
     updated_at: new Date().toISOString(),

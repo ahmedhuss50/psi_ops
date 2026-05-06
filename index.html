@@ -82,10 +82,11 @@
   /* ===== Shop Kanban ===== */
   .kanban {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
   }
-  @media (max-width: 1100px) { .kanban { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 1300px) { .kanban { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 900px)  { .kanban { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 600px)  { .kanban { grid-template-columns: 1fr; } }
 
   .kanban-col {
@@ -119,6 +120,8 @@
   .kanban-col.in_progress .kanban-col-title { color: var(--primary); }
   .kanban-col.on_hold .kanban-col-header { background: var(--warning-soft); }
   .kanban-col.on_hold .kanban-col-title { color: var(--warning); }
+  .kanban-col.qc_review .kanban-col-header { background: var(--indigo-soft); }
+  .kanban-col.qc_review .kanban-col-title { color: var(--indigo); }
   .kanban-col.completed .kanban-col-header { background: var(--success-soft); }
   .kanban-col.completed .kanban-col-title { color: var(--success); }
 
@@ -261,6 +264,7 @@
   .display-board.cols-2 { grid-template-columns: repeat(2, 1fr); }
   .display-board.cols-3 { grid-template-columns: repeat(3, 1fr); }
   .display-board.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .display-board.cols-5 { grid-template-columns: repeat(5, 1fr); }
   @media (max-width: 800px) { .display-board { grid-template-columns: 1fr !important; } }
 
   .display-col {
@@ -277,6 +281,7 @@
   .display-col-header.pending { border-bottom-color: #94a3b8; }
   .display-col-header.in_progress { border-bottom-color: var(--primary); background: var(--primary-soft); }
   .display-col-header.on_hold { border-bottom-color: var(--warning); background: var(--warning-soft); }
+  .display-col-header.qc_review { border-bottom-color: var(--indigo); background: var(--indigo-soft); }
   .display-col-header.completed { border-bottom-color: var(--success); background: var(--success-soft); }
   .display-col-title { font-size: 16px; font-weight: 700; }
   .display-col-count {
@@ -1476,6 +1481,7 @@
               <label><input type="checkbox" data-col="pending" checked> Pending</label>
               <label><input type="checkbox" data-col="in_progress" checked> In Progress</label>
               <label><input type="checkbox" data-col="on_hold" checked> On Hold</label>
+              <label><input type="checkbox" data-col="qc_review" checked> QC</label>
               <label><input type="checkbox" data-col="completed" checked> Completed</label>
             </div>
           </div>
@@ -1641,6 +1647,10 @@
         <div class="kanban-col on_hold">
           <div class="kanban-col-header"><div class="kanban-col-title">⚠️ On Hold</div><div class="kanban-col-count" id="cntOnHold">0</div></div>
           <div class="kanban-col-body" id="colOnHold"></div>
+        </div>
+        <div class="kanban-col qc_review">
+          <div class="kanban-col-header"><div class="kanban-col-title">🔍 QC</div><div class="kanban-col-count" id="cntQC">0</div></div>
+          <div class="kanban-col-body" id="colQC"></div>
         </div>
         <div class="kanban-col completed">
           <div class="kanban-col-header"><div class="kanban-col-title">✓ Completed (24h)</div><div class="kanban-col-count" id="cntCompleted">0</div></div>
@@ -2653,7 +2663,7 @@ function detectFleet(job) {
 // SHOP DISPLAY (KDS for floor)
 // =====================================================
 const DEFAULT_DISPLAY_SETTINGS = {
-  columns: { pending: true, in_progress: true, on_hold: true, completed: true },
+  columns: { pending: true, in_progress: true, on_hold: true, qc_review: true, completed: true },
   cardSize: 'normal',
   refreshRate: 30,
   completedWindow: 4,
@@ -2795,6 +2805,7 @@ function renderDisplay() {
     pending: jobs.filter(j => ['pending','new','scheduled'].includes(j.status)),
     in_progress: jobs.filter(j => j.status === 'in_progress'),
     on_hold: jobs.filter(j => ['on_hold','blocked'].includes(j.status)),
+    qc_review: jobs.filter(j => j.status === 'qc_review'),
     completed: jobs.filter(j => j.status === 'completed' && j.completed_at && new Date(j.completed_at).getTime() > completedCutoff),
   };
   Object.values(cols).forEach(arr => arr.sort((a, b) =>
@@ -2802,12 +2813,12 @@ function renderDisplay() {
   ));
 
   // Total visible
-  const totalActive = cols.pending.length + cols.in_progress.length + cols.on_hold.length;
+  const totalActive = cols.pending.length + cols.in_progress.length + cols.on_hold.length + cols.qc_review.length;
   document.getElementById('dsJobCount').textContent = `${totalActive} active`;
   document.getElementById('dsCustomerLabel').textContent = displaySettings.customerFilter || 'All customers';
 
   // Build columns
-  const visibleCols = ['pending','in_progress','on_hold','completed'].filter(c => displaySettings.columns[c]);
+  const visibleCols = ['pending','in_progress','on_hold','qc_review','completed'].filter(c => displaySettings.columns[c]);
   board.className = 'display-board cols-' + visibleCols.length;
   if (displaySettings.theme === 'hc') board.classList.add('theme-hc');
 
@@ -2815,6 +2826,7 @@ function renderDisplay() {
     pending: '⏳ Incoming',
     in_progress: '🔧 In Progress',
     on_hold: '⚠️ On Hold',
+    qc_review: '🔍 QC',
     completed: '✓ Just Completed',
   };
 
@@ -2863,8 +2875,14 @@ function renderDisplayCard(job, column) {
   } else if (column === 'in_progress') {
     actions = `
       <div class="display-card-actions">
-        <button class="display-card-action success" onclick="event.stopPropagation(); displayMoveStatus('${job.id}', 'completed')">✓ Complete</button>
+        <button class="display-card-action primary" onclick="event.stopPropagation(); displayMoveStatus('${job.id}', 'qc_review')">🔍 Send to QC</button>
         <button class="display-card-action" onclick="event.stopPropagation(); displayMoveStatus('${job.id}', 'on_hold')">⚠ Hold</button>
+      </div>`;
+  } else if (column === 'qc_review') {
+    actions = `
+      <div class="display-card-actions">
+        <button class="display-card-action success" onclick="event.stopPropagation(); displayMoveStatus('${job.id}', 'completed')">✓ Pass / Complete</button>
+        <button class="display-card-action" onclick="event.stopPropagation(); displayMoveStatus('${job.id}', 'in_progress')">↩ Send Back</button>
       </div>`;
   } else if (column === 'on_hold') {
     actions = `
@@ -2930,6 +2948,7 @@ function renderShop() {
     pending: filtered.filter(j => ['pending', 'new', 'scheduled'].includes(j.status)),
     in_progress: filtered.filter(j => j.status === 'in_progress'),
     on_hold: filtered.filter(j => ['on_hold', 'blocked'].includes(j.status)),
+    qc_review: filtered.filter(j => j.status === 'qc_review'),
     completed: filtered.filter(j => j.status === 'completed' && j.completed_at && new Date(j.completed_at) > oneDayAgo),
   };
 
@@ -2941,11 +2960,15 @@ function renderShop() {
   document.getElementById('cntPending').textContent = cols.pending.length;
   document.getElementById('cntInProgress').textContent = cols.in_progress.length;
   document.getElementById('cntOnHold').textContent = cols.on_hold.length;
+  if (document.getElementById('cntQC')) document.getElementById('cntQC').textContent = cols.qc_review.length;
   document.getElementById('cntCompleted').textContent = cols.completed.length;
 
   document.getElementById('colPending').innerHTML = renderShopCards(cols.pending) || '<div class="kanban-empty">Nothing pending</div>';
   document.getElementById('colInProgress').innerHTML = renderShopCards(cols.in_progress) || '<div class="kanban-empty">No active work</div>';
   document.getElementById('colOnHold').innerHTML = renderShopCards(cols.on_hold) || '<div class="kanban-empty">All clear</div>';
+  if (document.getElementById('colQC')) {
+    document.getElementById('colQC').innerHTML = renderShopCards(cols.qc_review) || '<div class="kanban-empty">Nothing in QC</div>';
+  }
   document.getElementById('colCompleted').innerHTML = renderShopCards(cols.completed) || '<div class="kanban-empty">No completions today</div>';
 }
 
@@ -3202,6 +3225,7 @@ function statusPill(s) {
   if (!s) return '<span class="pill neutral">—</span>';
   if (s === 'completed') return '<span class="pill success">Completed</span>';
   if (s === 'in_progress') return '<span class="pill primary">In Progress</span>';
+  if (s === 'qc_review') return '<span class="pill indigo">QC</span>';
   if (s === 'on_hold' || s === 'blocked') return '<span class="pill warning">On Hold</span>';
   if (s === 'cancelled') return '<span class="pill danger">Cancelled</span>';
   return `<span class="pill neutral">${escapeHtml(s)}</span>`;

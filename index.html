@@ -185,6 +185,17 @@
   .attention-item .att-icon { font-size: 18px; }
   .attention-item .att-text { flex: 1; font-size: 13px; }
   .attention-item .att-meta { font-size: 11px; color: var(--text-muted); }
+  .attention-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .attention-toggle:hover .card-title { color: var(--text); }
+  .attention-chevron {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 6px; width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text-muted); cursor: pointer; flex-shrink: 0;
+    transition: transform 0.18s ease, background 0.12s, color 0.12s;
+  }
+  .attention-chevron:hover { background: var(--surface-hover); color: var(--text); }
+  .attention-card.is-expanded .attention-chevron { transform: rotate(180deg); }
 
   /* ===== Trends / Charts ===== */
   .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
@@ -1772,15 +1783,18 @@
         </div>
       </div>
 
-      <!-- Needs Attention -->
+      <!-- Needs Attention (collapsible, collapsed by default) -->
       <div class="card attention-card" id="attentionCard" style="display: none;">
-        <div class="card-header">
+        <div class="card-header attention-toggle" onclick="toggleAttention()" style="cursor: pointer; user-select: none;">
           <div>
             <div class="card-title">⚠️ Needs Attention</div>
             <div class="card-subtitle" id="attentionSubtitle">Items that should be reviewed</div>
           </div>
+          <button type="button" class="attention-chevron" id="attentionChevron" aria-label="Expand needs attention" aria-expanded="false">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>
+          </button>
         </div>
-        <div id="attentionList"></div>
+        <div id="attentionList" style="display: none;"></div>
       </div>
 
       <div class="kpi-grid" id="kpiGrid">
@@ -4765,7 +4779,14 @@ function renderAttention() {
   }
   card.style.display = 'block';
   document.getElementById('attentionSubtitle').textContent =
-    `${items.length} item${items.length !== 1 ? 's' : ''} flagged`;
+    `${items.length} item${items.length !== 1 ? 's' : ''} flagged · click to expand`;
+
+  // Apply persisted collapsed/expanded state (default: collapsed)
+  const expanded = localStorage.getItem('attentionExpanded') === '1';
+  card.classList.toggle('is-expanded', expanded);
+  list.style.display = expanded ? 'block' : 'none';
+  const chev = document.getElementById('attentionChevron');
+  if (chev) chev.setAttribute('aria-expanded', expanded ? 'true' : 'false');
 
   list.innerHTML = items.slice(0, 8).map((it, idx) => `
     <div class="attention-item ${it.urgent ? 'urgent' : ''}" onclick="window._attActions[${idx}]()">
@@ -4778,6 +4799,18 @@ function renderAttention() {
   `).join('');
   // Stash actions globally for onclick
   window._attActions = items.slice(0, 8).map(it => it.action);
+}
+
+function toggleAttention() {
+  const card = document.getElementById('attentionCard');
+  const list = document.getElementById('attentionList');
+  const chev = document.getElementById('attentionChevron');
+  if (!card || !list) return;
+  const nowExpanded = !card.classList.contains('is-expanded');
+  card.classList.toggle('is-expanded', nowExpanded);
+  list.style.display = nowExpanded ? 'block' : 'none';
+  if (chev) chev.setAttribute('aria-expanded', nowExpanded ? 'true' : 'false');
+  localStorage.setItem('attentionExpanded', nowExpanded ? '1' : '0');
 }
 
 // =====================================================

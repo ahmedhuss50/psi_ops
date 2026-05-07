@@ -1918,9 +1918,11 @@
             <select class="input" id="dsCompletedWindow">
               <option value="1">Last 1 hour</option>
               <option value="4">Last 4 hours</option>
-              <option value="24" selected>Last 24 hours (today)</option>
+              <option value="24">Last 24 hours (today)</option>
               <option value="48">Last 48 hours (today + yesterday)</option>
+              <option value="120" selected>Last 5 days</option>
               <option value="168">Last 7 days</option>
+              <option value="336">Last 14 days</option>
             </select>
           </div>
           <div class="ds-group">
@@ -3255,7 +3257,7 @@ const DEFAULT_DISPLAY_SETTINGS = {
   columns: { pending: true, in_progress: true, on_hold: true, qc_review: true, completed: true },
   cardSize: 'normal',
   refreshRate: 30,
-  completedWindow: 48, // today + yesterday
+  completedWindow: 120, // last 5 days
   customerFilter: '',
   fleetFilter: '',
   theme: 'default',
@@ -3263,9 +3265,9 @@ const DEFAULT_DISPLAY_SETTINGS = {
 };
 
 let displaySettings = JSON.parse(localStorage.getItem('psihub_display_settings') || 'null') || { ...DEFAULT_DISPLAY_SETTINGS };
-// Auto-upgrade older saved setting from short window (1 or 4 hours) to 48h so completions are visible
-if (displaySettings.completedWindow && displaySettings.completedWindow <= 4) {
-  displaySettings.completedWindow = 48;
+// Auto-upgrade older saved setting (anything ≤ 48h) to 120h (5 days) so completions are visible
+if (!displaySettings.completedWindow || displaySettings.completedWindow <= 48) {
+  displaySettings.completedWindow = 120;
   localStorage.setItem('psihub_display_settings', JSON.stringify(displaySettings));
 }
 let displayRefreshTimer = null;
@@ -3409,11 +3411,26 @@ function renderDisplay() {
     in_progress: jobs.filter(j => j.status === 'in_progress'),
     on_hold: jobs.filter(j => ['on_hold','blocked'].includes(j.status)),
     qc_review: jobs.filter(j => j.status === 'qc_review'),
-    completed: jobs.filter(j => j.status === 'completed' && j.completed_at && new Date(j.completed_at).getTime() > completedCutoff),
+    completed: jobs.filter(j => {
+      if (j.status !== 'completed') return false;
+      // Fall back to updated_at when completed_at is missing (data quality gap)
+      const ts = j.completed_at || j.updated_at;
+      if (!ts) return false;
+      return new Date(ts).getTime() > completedCutoff;
+    }),
   };
-  Object.values(cols).forEach(arr => arr.sort((a, b) =>
-    new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0)
-  ));
+  // Sort each column. Completed column sorts by completion time when known.
+  Object.entries(cols).forEach(([colName, arr]) => {
+    if (colName === 'completed') {
+      arr.sort((a, b) =>
+        new Date(b.completed_at || b.updated_at || 0) - new Date(a.completed_at || a.updated_at || 0)
+      );
+    } else {
+      arr.sort((a, b) =>
+        new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0)
+      );
+    }
+  });
 
   // Total visible
   const totalActive = cols.pending.length + cols.in_progress.length + cols.on_hold.length + cols.qc_review.length;
@@ -3432,7 +3449,10 @@ function renderDisplay() {
     if (w <= 4) return '✓ Just Completed';
     if (w === 24) return '✓ Completed Today';
     if (w === 48) return '✓ Today + Yesterday';
+    if (w === 120) return '✓ Past 5 Days';
     if (w === 168) return '✓ Past 7 Days';
+    if (w === 336) return '✓ Past 14 Days';
+    if (w >= 24) return `✓ Past ${Math.round(w/24)} Days`;
     return `✓ Completed (${w}h)`;
   })();
 

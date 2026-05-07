@@ -447,6 +447,19 @@
   }
 
   .intro-presented { font-size: 13px; font-weight: 500; letter-spacing: 0.4em; color: #94a3b8; text-transform: uppercase; }
+  .intro-logo {
+    text-align: center;
+    opacity: 0;
+  }
+  .intro-logo svg { display: block; margin: 0 auto; max-width: 80vw; }
+  .intro-logo-caption {
+    color: #94a3b8;
+    font-size: 14px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-top: 24px;
+    font-weight: 500;
+  }
   .intro-tagline { font-size: 22px; color: #cbd5e1; font-weight: 400; font-style: italic; }
   @media (max-width: 700px) { .intro-tagline { font-size: 16px; } }
   .intro-line1 { font-size: 28px; color: #94a3b8; font-style: italic; font-weight: 500; }
@@ -1478,35 +1491,24 @@
   <aside class="sidebar">
     <div class="logo">
       <svg viewBox="0 0 200 100" width="180" height="80" xmlns="http://www.w3.org/2000/svg" style="display: block;">
-        <!-- Cream background -->
-        <rect width="200" height="100" rx="8" fill="#f1e7d0"/>
-
         <!-- Oil pump jack on left -->
         <g transform="translate(8, 14)" fill="#0a0a0a">
-          <!-- Base/ground -->
           <rect x="0" y="64" width="42" height="6"/>
-          <!-- Tower (triangular) -->
           <polygon points="6,64 18,12 30,64"/>
-          <!-- Tower interior cutout (white triangle) -->
-          <polygon points="11,60 18,22 25,60" fill="#f1e7d0"/>
-          <!-- Rungs (ladder) -->
+          <polygon points="11,60 18,22 25,60" fill="#ffffff"/>
           <line x1="14" y1="40" x2="22" y2="40" stroke="#0a0a0a" stroke-width="1.5"/>
           <line x1="13" y1="48" x2="23" y2="48" stroke="#0a0a0a" stroke-width="1.5"/>
           <line x1="12" y1="56" x2="24" y2="56" stroke="#0a0a0a" stroke-width="1.5"/>
-          <!-- Walking beam (top horizontal arm) -->
           <rect x="3" y="8" width="34" height="6"/>
-          <!-- Horse head -->
           <polygon points="0,4 10,4 10,16 6,18 0,16"/>
-          <!-- Counterweight at back -->
           <rect x="32" y="16" width="8" height="14"/>
-          <!-- Pivot circle -->
           <circle cx="18" cy="11" r="3"/>
         </g>
 
-        <!-- "PSI" big red letters -->
+        <!-- PSI red letters -->
         <text x="62" y="62" font-family="Impact, 'Arial Black', sans-serif" font-size="56" font-weight="900" fill="#dc2626" letter-spacing="-1">PSI</text>
 
-        <!-- "OILFIELD SERVICES" red banner -->
+        <!-- OILFIELD SERVICES red banner -->
         <rect x="58" y="72" width="132" height="16" fill="#dc2626" rx="2"/>
         <text x="124" y="83" font-family="Arial, sans-serif" font-size="11" font-weight="800" fill="white" text-anchor="middle" letter-spacing="2">OILFIELD SERVICES</text>
       </svg>
@@ -5883,16 +5885,47 @@ function playIntro() {
     setTimeout(() => el.remove(), durMs || 1300);
   }
 
+  // ====== Logo SVG strings (transparent, for the intro) ======
+  const innuvisLogo = `
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width: min(85vw, 900px);">
+      <line x1="60" y1="34" x2="580" y2="34" stroke="#3eddc4" stroke-width="9" stroke-linecap="round"/>
+      <line x1="578" y1="34" x2="624" y2="86" stroke="#3eddc4" stroke-width="9" stroke-linecap="round"/>
+      <text x="350" y="155" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+            font-size="120" font-weight="400" fill="white" text-anchor="middle" letter-spacing="3">innuvis</text>
+    </svg>`;
+
+  const psiLogo = `
+    <svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" style="width: min(70vw, 480px);">
+      <g transform="translate(20, 22)" fill="white">
+        <rect x="0" y="98" width="60" height="9"/>
+        <polygon points="9,98 26,18 43,98"/>
+        <polygon points="16,92 26,30 36,92" fill="#000"/>
+        <line x1="20" y1="60" x2="32" y2="60" stroke="white" stroke-width="2"/>
+        <line x1="19" y1="72" x2="33" y2="72" stroke="white" stroke-width="2"/>
+        <line x1="18" y1="84" x2="34" y2="84" stroke="white" stroke-width="2"/>
+        <rect x="4" y="12" width="50" height="9"/>
+        <polygon points="0,6 14,6 14,24 8,28 0,24"/>
+        <rect x="46" y="24" width="12" height="20"/>
+        <circle cx="26" cy="16" r="4"/>
+      </g>
+      <text x="105" y="92" font-family="Impact, 'Arial Black', sans-serif"
+            font-size="80" font-weight="900" fill="#dc2626" letter-spacing="-2">PSI</text>
+      <rect x="98" y="106" width="208" height="22" fill="#dc2626" rx="3"/>
+      <text x="202" y="122" font-family="Arial, sans-serif" font-size="14"
+            font-weight="800" fill="white" text-anchor="middle" letter-spacing="3">OILFIELD SERVICES</text>
+    </svg>`;
+
   // ====== Text sequence ======
   const sequence = [
-    { html: 'INNUVIS&nbsp;&nbsp;PRESENTS', cls: 'intro-presented', t: 800 },
+    { html: innuvisLogo + '<div class="intro-logo-caption">presents</div>', cls: 'intro-logo show', t: 600, isLogo: true },
+    { html: psiLogo, cls: 'intro-logo show-fast', t: 4500, isLogo: true },
     { html: 'PSI&nbsp;OPS&nbsp;PORTAL', cls: 'intro-title', t: 8000, zoom: true, flash: true },
     { html: 'Saddle up. Iron ahead.', cls: 'intro-tagline', t: 10500 },
   ];
 
   sequence.forEach(item => {
     setTimeout(() => {
-      stage.querySelectorAll('.intro-text').forEach(el => {
+      stage.querySelectorAll('.intro-text, .intro-logo').forEach(el => {
         el.classList.add('hide');
         setTimeout(() => el.remove(), 500);
       });
@@ -5902,7 +5935,12 @@ function playIntro() {
         flash.classList.add('flash');
       }
       const div = document.createElement('div');
-      div.className = `intro-text ${item.cls} ${item.zoom ? 'show-zoom' : 'show'}`;
+      if (item.isLogo) {
+        div.className = item.cls;
+        div.style.animation = 'introShow 0.8s forwards';
+      } else {
+        div.className = `intro-text ${item.cls} ${item.zoom ? 'show-zoom' : 'show'}`;
+      }
       div.innerHTML = item.html;
       stage.appendChild(div);
     }, item.t);

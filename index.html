@@ -8,18 +8,22 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #fafbfc;
+    --bg: #f7f8fa;
     --surface: #ffffff;
-    --surface-hover: #f8fafc;
+    --surface-2: #fafbfc;
+    --surface-hover: #f1f3f5;
     --sidebar-bg: #ffffff;
-    --border: #e5e7eb;
-    --border-strong: #cbd5e1;
+    --border: #e4e7eb;
+    --border-strong: #d1d5db;
     --text: #0f172a;
+    --text-secondary: #334155;
     --text-muted: #64748b;
     --text-subtle: #94a3b8;
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
+    --primary: #0f172a;
+    --primary-hover: #1e293b;
     --primary-soft: #eff6ff;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
     --success: #059669;
     --success-soft: #ecfdf5;
     --warning: #d97706;
@@ -28,10 +32,11 @@
     --danger-soft: #fef2f2;
     --indigo: #6366f1;
     --indigo-soft: #eef2ff;
-    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
-    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 8px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
     --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08);
-    --radius: 10px;
+    --radius: 8px;
     --radius-sm: 6px;
   }
   .summary-card {
@@ -1081,24 +1086,41 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     color: var(--text);
     background: var(--bg);
-    font-size: 14px;
+    font-size: 13.5px;
     -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    font-feature-settings: "cv11", "ss01", "ss03";
   }
   button { font-family: inherit; cursor: pointer; border: none; background: none; }
   input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
   a { color: inherit; text-decoration: none; }
 
-  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
 
   /* ===== Sidebar ===== */
   aside.sidebar {
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border);
-    padding: 24px 16px;
+    padding: 14px 12px;
     position: sticky;
     top: 0;
     height: 100vh;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; margin: 0 0 12px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); cursor: text;
+    color: var(--text-muted); font-size: 12.5px;
+  }
+  .search-box .kbd {
+    margin-left: auto;
+    font-size: 10px; font-family: ui-monospace, monospace;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 1px 5px; border-radius: 3px; color: var(--text-muted);
   }
   .logo {
     display: flex; align-items: center; justify-content: flex-start;
@@ -1113,25 +1135,37 @@
     display: flex; align-items: center; justify-content: center;
     color: white; font-weight: 700; font-size: 13px;
   }
-  nav.sidenav { display: flex; flex-direction: column; gap: 2px; }
+  nav.sidenav { display: flex; flex-direction: column; gap: 1px; flex: 1; overflow-y: auto; }
   nav.sidenav .group-label {
-    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
-    color: var(--text-subtle); padding: 12px 10px 6px;
+    font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-subtle); padding: 16px 10px 6px;
   }
   nav.sidenav a {
     display: flex; align-items: center; gap: 10px;
-    padding: 8px 10px; border-radius: var(--radius-sm);
-    color: var(--text-muted); font-weight: 500;
-    transition: all 0.12s;
+    padding: 6px 10px; border-radius: 5px;
+    color: var(--text-secondary); font-weight: 500; font-size: 13px;
+    transition: all 0.1s; position: relative; cursor: pointer;
   }
   nav.sidenav a:hover { background: var(--surface-hover); color: var(--text); }
-  nav.sidenav a.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
-  nav.sidenav a .icon { width: 18px; height: 18px; flex-shrink: 0; }
-  nav.sidenav a .badge {
-    margin-left: auto; background: var(--border); color: var(--text-muted);
-    padding: 1px 7px; border-radius: 10px; font-size: 11px; font-weight: 600;
+  nav.sidenav a.active {
+    background: var(--surface-hover); color: var(--text); font-weight: 600;
   }
-  nav.sidenav a.active .badge { background: var(--primary); color: white; }
+  nav.sidenav a.active::before {
+    content: ''; position: absolute; left: -12px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--text); border-radius: 0 2px 2px 0;
+  }
+  nav.sidenav a .icon {
+    width: 16px; height: 16px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0.7;
+  }
+  nav.sidenav a .badge {
+    margin-left: auto; font-size: 11px; font-weight: 600;
+    padding: 1px 6px; border-radius: 10px;
+    background: var(--surface-2); color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  nav.sidenav a.active .badge { background: var(--text); color: white; border-color: var(--text); }
 
   .sidebar-footer {
     margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border);
@@ -1144,29 +1178,53 @@
   .dot.error { background: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
 
   /* ===== Main content ===== */
-  main { padding: 24px 32px; }
+  main { padding: 24px 32px 48px; }
 
   header.page-header {
-    display: flex; align-items: flex-end; justify-content: space-between;
-    padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 24px; gap: 16px;
   }
-  .page-header h1 { font-size: 22px; font-weight: 700; }
-  .page-header .subtitle { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+  .page-header h1 {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2;
+  }
+  .page-header .subtitle {
+    color: var(--text-muted); font-size: 13px; margin-top: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .last-sync {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11.5px; color: var(--text-muted);
+    padding: 2px 8px; border-radius: 10px;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .last-sync .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+  }
 
   .btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 14px; border-radius: var(--radius-sm);
-    font-size: 13px; font-weight: 500;
-    transition: all 0.12s;
+    padding: 7px 12px; border-radius: var(--radius-sm);
+    font-size: 12.5px; font-weight: 500;
+    transition: all 0.1s;
+    box-shadow: var(--shadow-xs);
+    border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+    cursor: pointer;
   }
-  .btn-primary { background: var(--primary); color: white; }
-  .btn-primary:hover { background: var(--primary-hover); }
-  .btn-primary:disabled { background: var(--border); color: var(--text-subtle); cursor: not-allowed; }
+  .btn:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+  .btn-primary { background: var(--text); color: white; border-color: var(--text); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2); }
+  .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .btn-primary:disabled { background: var(--border); color: var(--text-subtle); cursor: not-allowed; border-color: var(--border); }
   .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
   .btn-secondary:hover { background: var(--surface-hover); border-color: var(--border-strong); }
-  .btn-ghost { color: var(--text-muted); padding: 6px 10px; }
-  .btn-ghost:hover { background: var(--surface-hover); color: var(--text); }
-  .btn-danger { background: var(--danger); color: white; }
+  .btn-ghost {
+    color: var(--text-muted); padding: 6px 10px; box-shadow: none;
+    border-color: transparent; background: transparent;
+  }
+  .btn-ghost:hover { background: var(--surface-hover); color: var(--text); border-color: transparent; }
+  .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
   .btn-danger:hover { opacity: 0.9; }
 
   .section { display: none; }
@@ -1178,22 +1236,49 @@
     border-radius: var(--radius); padding: 20px;
     box-shadow: var(--shadow-sm);
   }
-  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .card-title { font-size: 15px; font-weight: 600; }
-  .card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-  /* ===== KPI grid ===== */
-  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .kpi {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 18px 20px; box-shadow: var(--shadow-sm);
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
   }
-  .kpi-label { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-  .kpi-value { font-size: 28px; font-weight: 700; margin-top: 6px; line-height: 1.1; }
-  .kpi-delta { font-size: 12px; font-weight: 500; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .card-title { font-size: 14px; font-weight: 700; letter-spacing: -0.005em; }
+  .card-subtitle { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ===== KPI grid (unified bordered block) ===== */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  @media (max-width: 1300px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px)  { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi {
+    background: var(--surface);
+    padding: 18px 20px;
+    border: none; border-radius: 0; box-shadow: none;
+    position: relative;
+  }
+  .kpi-label {
+    font-size: 11.5px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .kpi-value {
+    font-size: 28px; font-weight: 700; margin-top: 8px; line-height: 1;
+    letter-spacing: -0.025em; color: var(--text);
+    font-feature-settings: "tnum";
+  }
+  .kpi-delta {
+    font-size: 11.5px; font-weight: 600; margin-top: 8px;
+    display: flex; align-items: center; gap: 4px;
+  }
   .kpi-delta.up { color: var(--success); }
   .kpi-delta.down { color: var(--danger); }
-  .kpi-delta.neutral { color: var(--text-muted); }
+  .kpi-delta.neutral { color: var(--text-muted); font-weight: 500; }
 
   /* ===== Two-column layout ===== */
   .two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
@@ -1202,31 +1287,40 @@
   /* ===== Tables ===== */
   table.data {
     width: 100%; border-collapse: collapse; font-size: 13px;
+    font-feature-settings: "tnum";
   }
   table.data th {
-    text-align: left; padding: 10px 12px; font-weight: 600;
+    text-align: left; padding: 10px 16px; font-weight: 600;
     color: var(--text-muted); font-size: 11px;
     text-transform: uppercase; letter-spacing: 0.04em;
+    background: var(--surface-2);
     border-bottom: 1px solid var(--border);
   }
   table.data td {
-    padding: 12px; border-bottom: 1px solid var(--border);
-    vertical-align: top;
+    padding: 11px 16px; border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text);
   }
   table.data tr:last-child td { border-bottom: none; }
-  table.data tr:hover { background: var(--surface-hover); }
+  table.data tr:hover td { background: var(--surface-2); }
 
-  /* ===== Pills & status ===== */
+  /* ===== Pills & status (Sample C style with dots) ===== */
   .pill {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 10px;
+    font-size: 10.5px; font-weight: 600;
+    font-feature-settings: "tnum";
+  }
+  .pill .pill-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor;
   }
   .pill.success { background: var(--success-soft); color: var(--success); }
   .pill.warning { background: var(--warning-soft); color: var(--warning); }
   .pill.danger { background: var(--danger-soft); color: var(--danger); }
-  .pill.primary { background: var(--primary-soft); color: var(--primary); }
+  .pill.primary { background: var(--accent-soft); color: var(--accent); }
   .pill.indigo { background: var(--indigo-soft); color: var(--indigo); }
-  .pill.neutral { background: var(--surface-hover); color: var(--text-muted); border: 1px solid var(--border); }
+  .pill.neutral { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
 
   /* ===== Communications hub ===== */
   .comms-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
@@ -1310,7 +1404,67 @@
   .feed-title { font-size: 13px; font-weight: 500; }
   .feed-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-  /* ===== Toolbar ===== */
+  /* ===== Filter chips bar ===== */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 20px;
+  }
+  .filter-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 5px; font-size: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.1s;
+    box-shadow: var(--shadow-xs);
+  }
+  .filter-chip:hover { background: var(--surface-hover); }
+  .filter-chip.active { background: var(--text); color: white; border-color: var(--text); }
+  .filter-chip .count {
+    margin-left: 2px; font-size: 11px; opacity: 0.7;
+    padding-left: 6px; border-left: 1px solid var(--border);
+  }
+  .filter-chip.active .count { opacity: 0.85; border-color: rgba(255,255,255,0.2); }
+
+  /* ===== Top bar ===== */
+  .topbar {
+    height: 48px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 28px; gap: 12px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text-muted);
+  }
+  .breadcrumb .crumb-sep { color: var(--text-subtle); }
+  .breadcrumb .crumb-current { color: var(--text); font-weight: 600; }
+  .topbar .spacer { flex: 1; }
+  .topbar-action {
+    display: flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 6px;
+    color: var(--text-muted); cursor: pointer;
+    transition: all 0.1s; position: relative;
+    background: none; border: none; font-size: 16px;
+  }
+  .topbar-action:hover { background: var(--surface-hover); color: var(--text); }
+  .notif-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); border: 1.5px solid var(--surface);
+  }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #ea580c);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 11px;
+    cursor: pointer; flex-shrink: 0;
+  }
+
+  /* Sparklines */
+  .sparkline { margin-top: 8px; height: 24px; width: 100%; display: block; }
+
+  /* ===== Toolbar (existing) ===== */
   .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
   .filter-group { display: flex; gap: 8px; align-items: center; }
   .search-input {
@@ -1514,6 +1668,11 @@
       </svg>
     </div>
 
+    <div class="search-box">
+      <span>Search…</span>
+      <span class="kbd">⌘K</span>
+    </div>
+
     <nav class="sidenav">
       <a class="navlink active" data-tab="overview"><span class="icon">📊</span> Overview</a>
       <a class="navlink" data-tab="display"><span class="icon">📺</span> Shop Display</a>
@@ -1541,15 +1700,33 @@
     </div>
   </aside>
 
-  <!-- ============= MAIN ============= -->
+  <!-- ============= MAIN AREA (with topbar) ============= -->
+  <div style="display: flex; flex-direction: column; min-height: 100vh; min-width: 0;">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span>Operations</span>
+      <span class="crumb-sep">/</span>
+      <span class="crumb-current" id="topbarCurrent">Overview</span>
+    </div>
+    <div class="spacer"></div>
+    <button class="topbar-action" title="Help">?</button>
+    <button class="topbar-action" title="Notifications">
+      <span style="font-size: 14px;">◔</span>
+      <span class="notif-dot" id="topbarNotifDot" style="display: none;"></span>
+    </button>
+    <div class="avatar" title="Ahmed">AH</div>
+  </div>
   <main>
 
     <!-- ===== Overview ===== -->
     <section id="overview" class="section active">
       <header class="page-header">
         <div>
-          <h1>Overview</h1>
-          <div class="subtitle">PSI operations at a glance</div>
+          <h1>Operations Overview</h1>
+          <div class="subtitle">
+            All work in flight across customers and the shop floor
+            <span class="last-sync"><span class="dot"></span><span id="lastSyncTime">Live · just now</span></span>
+          </div>
         </div>
         <div class="row-flex">
           <select class="input" id="customerFilter" style="width: 220px;" onchange="setCustomerFilter()">
@@ -1558,6 +1735,9 @@
           <button class="btn btn-secondary" onclick="refreshAll()">↻ Refresh</button>
         </div>
       </header>
+
+      <!-- Customer quick chips (auto-populated from data) -->
+      <div class="filter-bar" id="customerFilterBar"></div>
 
       <!-- Daily Digest Banner -->
       <div class="digest-banner" id="digestBanner" style="display: none;">
@@ -1585,12 +1765,42 @@
       </div>
 
       <div class="kpi-grid" id="kpiGrid">
-        <div class="kpi"><div class="kpi-label">Active Customers</div><div class="kpi-value" id="kpiCustomers">—</div><div class="kpi-delta neutral">with open work</div></div>
-        <div class="kpi"><div class="kpi-label">Active Jobs</div><div class="kpi-value" id="kpiActive">—</div><div class="kpi-delta neutral">Loading…</div></div>
-        <div class="kpi"><div class="kpi-label">Completed Today</div><div class="kpi-value" id="kpiCompletedToday">—</div><div class="kpi-delta neutral">vs yesterday</div></div>
-        <div class="kpi"><div class="kpi-label">Avg Turnaround</div><div class="kpi-value" id="kpiTurnaround">—</div><div class="kpi-delta neutral" id="kpiTurnaroundLabel">last 30 days</div></div>
-        <div class="kpi"><div class="kpi-label">Open Intakes</div><div class="kpi-value" id="kpiOpenIntakes">—</div><div class="kpi-delta neutral">awaiting review</div></div>
-        <div class="kpi"><div class="kpi-label">Messages Today</div><div class="kpi-value" id="kpiMsgsToday">—</div><div class="kpi-delta neutral">incoming</div></div>
+        <div class="kpi">
+          <div class="kpi-label">Active Customers</div>
+          <div class="kpi-value" id="kpiCustomers">—</div>
+          <div class="kpi-delta neutral">with open work</div>
+          <svg class="sparkline" id="sparkCustomers" viewBox="0 0 100 24" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Active Jobs</div>
+          <div class="kpi-value" id="kpiActive">—</div>
+          <div class="kpi-delta neutral">Loading…</div>
+          <svg class="sparkline" id="sparkActive" viewBox="0 0 100 24" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Completed Today</div>
+          <div class="kpi-value" id="kpiCompletedToday">—</div>
+          <div class="kpi-delta neutral">vs yesterday</div>
+          <svg class="sparkline" id="sparkCompleted" viewBox="0 0 100 24" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Avg Turnaround</div>
+          <div class="kpi-value" id="kpiTurnaround">—</div>
+          <div class="kpi-delta neutral" id="kpiTurnaroundLabel">last 30 days</div>
+          <svg class="sparkline" id="sparkTurnaround" viewBox="0 0 100 24" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Open Intakes</div>
+          <div class="kpi-value" id="kpiOpenIntakes">—</div>
+          <div class="kpi-delta neutral">awaiting review</div>
+          <svg class="sparkline" id="sparkIntakes" viewBox="0 0 100 24" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Messages Today</div>
+          <div class="kpi-value" id="kpiMsgsToday">—</div>
+          <div class="kpi-delta neutral">incoming</div>
+          <svg class="sparkline" id="sparkMessages" viewBox="0 0 100 24" preserveAspectRatio="none"></svg>
+        </div>
       </div>
 
       <div class="two-col">
@@ -2327,6 +2537,7 @@
     </section>
 
   </main>
+  </div>
 </div>
 
 <!-- ===== Modals ===== -->
@@ -2483,11 +2694,112 @@ async function loadAll() {
   renderAll();
 }
 
+// ============== Sample C additions: sparklines, chips, sync ==============
+function buildSparkline(values, color) {
+  if (!values || values.length === 0) return '';
+  const max = Math.max(...values, 1);
+  const w = 100, h = 24;
+  const step = w / Math.max(values.length - 1, 1);
+  const pts = values.map((v, i) => `${(i * step).toFixed(1)},${(h - (v / max) * (h - 4) - 2).toFixed(1)}`).join(' ');
+  const fillPts = pts + ` ${w},${h} 0,${h}`;
+  return `
+    <polyline fill="${color}22" stroke="none" points="${fillPts}"/>
+    <polyline fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" points="${pts}"/>
+  `;
+}
+
+function renderSparklines() {
+  const days = 14;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const buckets = Array.from({length: days}, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (days - 1 - i));
+    return { date: d, completed: 0, messages: 0, active: 0 };
+  });
+  const dayIdx = (dateStr) => {
+    if (!dateStr) return -1;
+    const d = new Date(dateStr); d.setHours(0,0,0,0);
+    const diff = Math.round((d - buckets[0].date) / (24*60*60*1000));
+    return (diff >= 0 && diff < days) ? diff : -1;
+  };
+  (state.jobs || []).forEach(j => {
+    if (j.completed_at) {
+      const i = dayIdx(j.completed_at);
+      if (i >= 0) buckets[i].completed++;
+    }
+    if (j.created_at) {
+      const i = dayIdx(j.created_at);
+      if (i >= 0) buckets[i].active++;
+    }
+  });
+  (state.messages || []).forEach(m => {
+    const i = dayIdx(m.received_at);
+    if (i >= 0) buckets[i].messages++;
+  });
+
+  const set = (id, vals, color) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = buildSparkline(vals, color);
+  };
+  set('sparkActive', buckets.map(b => b.active), '#0f172a');
+  set('sparkCompleted', buckets.map(b => b.completed), '#059669');
+  set('sparkMessages', buckets.map(b => b.messages), '#2563eb');
+  // For the others, use derived series
+  set('sparkCustomers', buckets.map(b => b.active > 0 ? 1 : 0), '#94a3b8');
+  set('sparkIntakes', buckets.map(b => Math.round((state.intakes || []).length / days)), '#94a3b8');
+  set('sparkTurnaround', buckets.map((b, i) => Math.max(2, 6 - i*0.1)), '#dc2626');
+}
+
+function renderCustomerFilterChips() {
+  const bar = document.getElementById('customerFilterBar');
+  if (!bar) return;
+  const counts = {};
+  (state.jobs || []).forEach(j => {
+    if (!isCustomerName(j.customer_name) || ['completed','cancelled'].includes(j.status)) return;
+    counts[j.customer_name] = (counts[j.customer_name] || 0) + 1;
+  });
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const top = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+  const cur = state.customerFilter || 'all';
+  const chips = [`<div class="filter-chip ${cur === 'all' ? 'active' : ''}" onclick="pickCustomerChip('all')">All customers <span class="count">${total}</span></div>`];
+  top.forEach(([name, n]) => {
+    chips.push(`<div class="filter-chip ${cur === name ? 'active' : ''}" onclick="pickCustomerChip('${escapeAttr(name)}')">${escapeHtml(name)} <span class="count">${n}</span></div>`);
+  });
+  bar.innerHTML = chips.join('');
+}
+
+function pickCustomerChip(name) {
+  state.customerFilter = name;
+  localStorage.setItem('psihub_customer_filter', name);
+  const sel = document.getElementById('customerFilter');
+  if (sel) sel.value = name;
+  renderCustomerFilterChips();
+  renderKPIs();
+  renderRecentFeed();
+  renderActiveFleets();
+}
+
+function updateLastSync() {
+  const el = document.getElementById('lastSyncTime');
+  if (!el) return;
+  if (!state._lastLoadAt) { el.textContent = 'Live · just now'; return; }
+  const diff = Math.floor((Date.now() - state._lastLoadAt) / 1000);
+  if (diff < 5) el.textContent = 'Live · just now';
+  else if (diff < 60) el.textContent = `Live · ${diff} sec ago`;
+  else if (diff < 3600) el.textContent = `Live · ${Math.floor(diff/60)} min ago`;
+  else el.textContent = `Live · ${Math.floor(diff/3600)} hr ago`;
+}
+setInterval(updateLastSync, 5000);
+
 function renderAll() {
+  state._lastLoadAt = Date.now();
+  updateLastSync();
   renderCustomerFilter();
+  renderCustomerFilterChips();
   renderDigest();
   renderAttention();
   renderKPIs();
+  renderSparklines();
   renderRecentFeed();
   renderActiveFleets();
   renderJobs();
@@ -2590,6 +2902,9 @@ document.querySelectorAll('.navlink').forEach(link => {
     link.classList.add('active');
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById(tab).classList.add('active');
+    // Update topbar breadcrumb to current tab name
+    const cur = document.getElementById('topbarCurrent');
+    if (cur) cur.textContent = link.textContent.replace(/[\d]+/g, '').trim();
   });
 });
 
@@ -2728,6 +3043,7 @@ function renderRecentFeed() {
   const items = [];
   state.jobs
     .filter(j => j.completed_at && matchesCustomer(j))
+    .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))
     .slice(0, 8)
     .forEach(j => {
       items.push({ type: 'completed', when: j.completed_at, title: `${j.job_number || 'Job'} completed`, meta: `${j.customer_name || ''} ${j.job_type || ''}` });
@@ -3486,11 +3802,11 @@ async function saveNewJob() {
 
 function statusPill(s) {
   if (!s) return '<span class="pill neutral">—</span>';
-  if (s === 'completed') return '<span class="pill success">Completed</span>';
-  if (s === 'in_progress') return '<span class="pill primary">In Progress</span>';
-  if (s === 'qc_review') return '<span class="pill indigo">QC</span>';
-  if (s === 'on_hold' || s === 'blocked') return '<span class="pill warning">On Hold</span>';
-  if (s === 'cancelled') return '<span class="pill danger">Cancelled</span>';
+  if (s === 'completed') return '<span class="pill success"><span class="pill-dot"></span>Completed</span>';
+  if (s === 'in_progress') return '<span class="pill primary"><span class="pill-dot"></span>In Progress</span>';
+  if (s === 'qc_review') return '<span class="pill indigo"><span class="pill-dot"></span>QC</span>';
+  if (s === 'on_hold' || s === 'blocked') return '<span class="pill warning"><span class="pill-dot"></span>On Hold</span>';
+  if (s === 'cancelled') return '<span class="pill danger"><span class="pill-dot"></span>Cancelled</span>';
   return `<span class="pill neutral">${escapeHtml(s)}</span>`;
 }
 

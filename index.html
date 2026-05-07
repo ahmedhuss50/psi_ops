@@ -835,86 +835,144 @@
 
   /* ===== Process Flow ===== */
   .process-flow {
-    display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch;
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch;
     margin-bottom: 24px;
   }
   .stage-card {
-    background: var(--surface); border: 2px solid var(--border);
-    border-radius: var(--radius); padding: 16px 18px;
-    flex: 1 1 220px; min-width: 220px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    flex: 1 1 240px; min-width: 240px;
     position: relative;
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition: box-shadow 0.15s, border-color 0.15s;
     cursor: pointer;
+    display: flex; flex-direction: column;
   }
-  .stage-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-  .stage-card.color-blue { border-color: #3b82f6; background: linear-gradient(180deg, #dbeafe 0%, #ffffff 30%); }
-  .stage-card.color-slate { border-color: #64748b; background: linear-gradient(180deg, #f1f5f9 0%, #ffffff 30%); }
-  .stage-card.color-amber { border-color: #d97706; background: linear-gradient(180deg, #fef3c7 0%, #ffffff 30%); }
-  .stage-card.color-indigo { border-color: #6366f1; background: linear-gradient(180deg, #e0e7ff 0%, #ffffff 30%); }
-  .stage-card.color-emerald { border-color: #059669; background: linear-gradient(180deg, #d1fae5 0%, #ffffff 30%); }
-  .stage-card.color-rose { border-color: #e11d48; background: linear-gradient(180deg, #ffe4e6 0%, #ffffff 30%); }
+  .stage-card:hover { box-shadow: var(--shadow-md); border-top-color: var(--primary); }
+  .stage-card.color-blue { border-top-color: #3b82f6; }
+  .stage-card.color-slate { border-top-color: #64748b; }
+  .stage-card.color-amber { border-top-color: #d97706; }
+  .stage-card.color-indigo { border-top-color: #6366f1; }
+  .stage-card.color-emerald { border-top-color: #059669; }
+  .stage-card.color-rose { border-top-color: #e11d48; }
 
-  .stage-num {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px; border-radius: 50%;
-    background: rgba(0,0,0,0.06); color: var(--text); font-weight: 800; font-size: 14px;
-    margin-bottom: 10px;
+  .stage-header-row {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 4px;
   }
-  .stage-title { font-size: 15px; font-weight: 700; line-height: 1.3; margin-bottom: 4px; }
-  .stage-owner { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
-  .stage-desc { font-size: 12px; color: var(--text); line-height: 1.5; margin-bottom: 10px; }
-  .stage-activities { list-style: none; padding: 0; margin: 0 0 10px 0; }
+  .stage-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .stage-num-divider {
+    color: var(--border-strong);
+  }
+  .stage-title {
+    font-size: 16px; font-weight: 700; line-height: 1.3;
+    color: var(--text); margin-bottom: 2px;
+  }
+  .stage-owner {
+    font-size: 12px; font-weight: 500; color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stage-owner::before {
+    content: '';
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--text-subtle);
+  }
+  .stage-desc {
+    font-size: 13px; color: var(--text); line-height: 1.55;
+    margin-bottom: 14px;
+  }
+  .stage-activities {
+    list-style: none; padding: 0; margin: 0 0 14px 0;
+  }
   .stage-activities li {
-    font-size: 11px; color: var(--text-muted); padding: 3px 0;
-    padding-left: 14px; position: relative;
+    font-size: 12px; color: var(--text-muted); padding: 4px 0 4px 16px;
+    position: relative; line-height: 1.4;
   }
   .stage-activities li::before {
-    content: '•'; position: absolute; left: 0; color: var(--primary); font-weight: 700;
+    content: '';
+    position: absolute; left: 0; top: 11px;
+    width: 6px; height: 1px; background: var(--text-subtle);
+  }
+  .stage-footer {
+    margin-top: auto;
+    padding-top: 12px; border-top: 1px solid var(--border);
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
   }
   .stage-status-pill {
-    display: inline-block; padding: 2px 8px; border-radius: 10px;
-    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
-    background: rgba(0,0,0,0.06); color: var(--text-muted);
+    display: inline-block; padding: 3px 9px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    background: var(--surface-hover); color: var(--text-muted);
+    font-family: ui-monospace, monospace;
   }
+
   .stage-arrow {
-    align-self: center; color: var(--text-muted); font-size: 24px; flex: 0 0 auto;
+    align-self: center;
+    color: var(--text-subtle);
+    font-size: 18px;
+    flex: 0 0 auto;
+    line-height: 1;
   }
 
   .stage-roles {
-    display: flex; gap: 4px; margin-bottom: 10px; flex-wrap: wrap;
+    display: flex; gap: 6px; flex-wrap: wrap;
   }
   .role-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 8px; border-radius: 10px;
-    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    display: inline-flex; align-items: center;
+    padding: 3px 9px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    font-family: ui-monospace, monospace;
   }
   .role-badge.ai { background: #ede9fe; color: #6d28d9; }
   .role-badge.human { background: #dbeafe; color: #1e40af; }
   .role-badge.both { background: #d1fae5; color: #065f46; }
+  .role-badge.automated { background: #ede9fe; color: #6d28d9; }
+  .role-badge.hybrid { background: #d1fae5; color: #065f46; }
+  .role-badge.manual { background: #dbeafe; color: #1e40af; }
 
   .automation-bar {
-    height: 4px; border-radius: 2px; margin-bottom: 12px;
-    background: linear-gradient(90deg, #2563eb 0%, #2563eb var(--ai-pct), #cbd5e1 var(--ai-pct), #cbd5e1 100%);
+    height: 3px; border-radius: 2px; margin-bottom: 14px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary) var(--ai-pct), var(--border) var(--ai-pct), var(--border) 100%);
   }
   .automation-bar.automated { --ai-pct: 100%; }
   .automation-bar.hybrid { --ai-pct: 50%; }
   .automation-bar.manual { --ai-pct: 5%; }
 
   .role-detail {
-    background: var(--surface-hover); border-radius: var(--radius-sm);
-    padding: 10px 12px; margin-top: 10px; font-size: 12px; line-height: 1.5;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px; margin-top: 10px;
+    font-size: 13px; line-height: 1.55;
+    background: var(--surface-hover);
   }
   .role-detail.ai { border-left: 3px solid #8b5cf6; }
   .role-detail.human { border-left: 3px solid #3b82f6; }
-  .role-detail strong { color: var(--text); }
+  .role-detail-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 4px;
+    font-family: ui-monospace, monospace;
+  }
 
   .legend {
-    display: flex; gap: 16px; flex-wrap: wrap;
-    padding: 12px 16px; background: var(--surface-hover); border-radius: var(--radius-sm);
-    margin-bottom: 16px; font-size: 12px;
+    display: flex; gap: 24px; flex-wrap: wrap; align-items: center;
+    padding: 14px 18px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 20px; font-size: 13px;
   }
-  .legend-item { display: flex; align-items: center; gap: 6px; }
-  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+  .legend-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted); margin-right: 4px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
 
   .stage-edit-actions {
     position: absolute; top: 8px; right: 8px;
@@ -1975,10 +2033,10 @@
 
       <div id="processFlowContainer">
         <div class="legend">
-          <div class="legend-item"><span class="role-badge ai">🤖 AI</span> handled by an agent (Claude / n8n)</div>
-          <div class="legend-item"><span class="role-badge human">👤 Human</span> physical work or judgment</div>
-          <div class="legend-item"><span class="role-badge both">🤝 Hybrid</span> AI assists, human approves</div>
-          <div class="legend-item" style="margin-left: auto;"><span class="legend-swatch" style="background: linear-gradient(90deg, #2563eb 50%, #cbd5e1 50%);"></span> Bar = % automated</div>
+          <span class="legend-title">Legend</span>
+          <div class="legend-item"><span class="role-badge automated">AUTOMATED</span> Handled end-to-end by AI</div>
+          <div class="legend-item"><span class="role-badge hybrid">HYBRID</span> AI assists, human decides</div>
+          <div class="legend-item"><span class="role-badge manual">MANUAL</span> Human work / judgment</div>
         </div>
 
         <div class="card">
@@ -1996,8 +2054,8 @@
         <div class="card" style="margin-top: 20px;">
           <div class="card-header">
             <div>
-              <div class="card-title">Side Processes</div>
-              <div class="card-subtitle">Inventory, parts, and communication channels that run alongside the main flow</div>
+              <div class="card-title">Supporting Processes</div>
+              <div class="card-subtitle">Inventory, parts, and communication channels running alongside the main flow</div>
             </div>
           </div>
           <div class="side-processes" id="sideStages">
@@ -2008,8 +2066,8 @@
         <div class="card" style="margin-top: 20px;">
           <div class="card-header">
             <div>
-              <div class="card-title">Status Mapping Reference</div>
-              <div class="card-subtitle">Each whiteboard stage maps to a job status in the database</div>
+              <div class="card-title">Status Mapping</div>
+              <div class="card-subtitle">How each workflow stage maps to a job status in the system</div>
             </div>
           </div>
           <div id="statusMapping"></div>
@@ -4404,7 +4462,7 @@ function renderProcess() {
     mainEl.innerHTML = '<div class="empty-state small-muted" style="width: 100%;">No stages yet. Run the migration or click "+ Add Stage".</div>';
   } else {
     mainEl.innerHTML = main.map((s, i) => `
-      ${i > 0 ? '<div class="stage-arrow">→</div>' : ''}
+      ${i > 0 ? '<div class="stage-arrow" aria-hidden="true">›</div>' : ''}
       ${renderStageCard(s, i + 1, false)}
     `).join('');
   }
@@ -4446,37 +4504,38 @@ function renderStageCard(stage, number, isSide) {
   const colorClass = `color-${stage.color || 'blue'}`;
   const activities = (stage.activities || []).slice(0, 6);
   const automation = stage.automation_level || 'manual';
-  const hasAI = !!(stage.ai_role && stage.ai_role.trim());
-  const hasHuman = !!(stage.human_role && stage.human_role.trim());
 
-  // Role badges
-  let badges = '';
-  if (automation === 'automated') badges += '<span class="role-badge ai">🤖 AI</span>';
-  else if (automation === 'manual') badges += '<span class="role-badge human">👤 Human</span>';
-  else {
-    badges += '<span class="role-badge both">🤝 Hybrid</span>';
-    if (hasAI) badges += '<span class="role-badge ai">🤖</span>';
-    if (hasHuman) badges += '<span class="role-badge human">👤</span>';
-  }
+  const automationLabel = {
+    automated: 'AUTOMATED',
+    hybrid: 'HYBRID',
+    manual: 'MANUAL',
+  }[automation] || 'MANUAL';
+
+  const stageNumLabel = number ? `<span class="stage-num">Stage ${number}</span><span class="stage-num-divider">·</span>` : '';
 
   return `
     <div class="stage-card ${colorClass}" onclick="if(!state.processEditMode) openStageDetail('${stage.id}'); else openStageEditor('${stage.id}')">
-      ${number ? `<div class="stage-num">${number}</div>` : ''}
       <div class="stage-edit-actions" onclick="event.stopPropagation()">
         <button title="Move up" onclick="moveStage('${stage.id}', -1)">↑</button>
         <button title="Move down" onclick="moveStage('${stage.id}', 1)">↓</button>
-        <button title="Edit" onclick="openStageEditor('${stage.id}')">✏️</button>
+        <button title="Edit" onclick="openStageEditor('${stage.id}')">Edit</button>
         <button title="Delete" onclick="deleteStage('${stage.id}')" style="color: var(--danger);">×</button>
       </div>
       <div class="automation-bar ${automation}"></div>
-      <div class="stage-roles">${badges}</div>
+      <div class="stage-header-row">
+        ${stageNumLabel}
+        <span class="role-badge ${automation}">${automationLabel}</span>
+      </div>
       <div class="stage-title">${escapeHtml(stage.title)}</div>
       ${stage.owner ? `<div class="stage-owner">${escapeHtml(stage.owner)}</div>` : ''}
       ${stage.description ? `<div class="stage-desc">${escapeHtml(stage.description)}</div>` : ''}
       ${activities.length > 0 ? `<ul class="stage-activities">
         ${activities.map(a => `<li>${escapeHtml(a)}</li>`).join('')}
       </ul>` : ''}
-      ${stage.status_mapping ? `<span class="stage-status-pill">→ ${escapeHtml(stage.status_mapping)}</span>` : ''}
+      ${stage.status_mapping ? `<div class="stage-footer">
+        <span style="font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">Maps to</span>
+        <span class="stage-status-pill">${escapeHtml(stage.status_mapping)}</span>
+      </div>` : ''}
     </div>
   `;
 }
@@ -4507,9 +4566,9 @@ function openStageDetail(id) {
             ${(s.activities || []).map(a => `<li style="margin-bottom: 4px;">${escapeHtml(a)}</li>`).join('')}
           </ul>
         </div>` : ''}
-      ${s.ai_role ? `<div class="role-detail ai"><strong>🤖 AI Agent Role:</strong><br/>${escapeHtml(s.ai_role)}</div>` : ''}
-      ${s.human_role ? `<div class="role-detail human"><strong>👤 Human Role:</strong><br/>${escapeHtml(s.human_role)}</div>` : ''}
-      ${s.automation_level ? `<div style="margin-top: 12px;"><div class="small-muted">Automation</div><span class="role-badge ${s.automation_level === 'automated' ? 'ai' : s.automation_level === 'manual' ? 'human' : 'both'}">${s.automation_level}</span></div>` : ''}
+      ${s.ai_role ? `<div class="role-detail ai"><div class="role-detail-label">AI Agent Role</div>${escapeHtml(s.ai_role)}</div>` : ''}
+      ${s.human_role ? `<div class="role-detail human"><div class="role-detail-label">Human Role</div>${escapeHtml(s.human_role)}</div>` : ''}
+      ${s.automation_level ? `<div style="margin-top: 12px;"><div class="small-muted" style="margin-bottom: 4px;">Automation Level</div><span class="role-badge ${s.automation_level}">${s.automation_level.toUpperCase()}</span></div>` : ''}
       ${s.status_mapping ? `<div style="margin-top: 12px;"><div class="small-muted">Maps to job status</div><span class="pill ${statusPillClass(s.status_mapping)}">${escapeHtml(s.status_mapping)}</span></div>` : ''}
       ${s.notes ? `<div style="margin-top: 12px;"><div class="small-muted">Notes</div>${escapeHtml(s.notes)}</div>` : ''}
     </div>
@@ -4558,11 +4617,11 @@ function openStageEditor(id) {
         </div>
 
         <div class="form-field">
-          <label>🤖 AI Agent Role</label>
+          <label>AI Agent Role</label>
           <textarea class="input" id="psAiRole" rows="3" placeholder="What does AI do at this stage? E.g., 'Group Text Agent classifies inbound messages…'">${escapeHtml(s.ai_role || '')}</textarea>
         </div>
         <div class="form-field">
-          <label>👤 Human Role</label>
+          <label>Human Role</label>
           <textarea class="input" id="psHumanRole" rows="3" placeholder="What does the human do? E.g., 'Crew physically performs the work…'">${escapeHtml(s.human_role || '')}</textarea>
         </div>
 
@@ -4570,9 +4629,9 @@ function openStageEditor(id) {
           <div class="form-field">
             <label>Automation Level</label>
             <select class="input" id="psAutomation">
-              <option value="manual"${s.automation_level === 'manual' ? ' selected' : ''}>👤 Manual (human only)</option>
-              <option value="hybrid"${s.automation_level === 'hybrid' ? ' selected' : ''}>🤝 Hybrid (AI + human)</option>
-              <option value="automated"${s.automation_level === 'automated' ? ' selected' : ''}>🤖 Automated (AI handles end-to-end)</option>
+              <option value="manual"${s.automation_level === 'manual' ? ' selected' : ''}>Manual — human only</option>
+              <option value="hybrid"${s.automation_level === 'hybrid' ? ' selected' : ''}>Hybrid — AI + human</option>
+              <option value="automated"${s.automation_level === 'automated' ? ' selected' : ''}>Automated — AI end-to-end</option>
             </select>
           </div>
           <div class="form-field">

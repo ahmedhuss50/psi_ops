@@ -1409,6 +1409,25 @@
     display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
     margin-bottom: 20px;
   }
+  .job-status-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.1s; font-size: 12.5px; font-weight: 500;
+    box-shadow: var(--shadow-xs);
+    user-select: none;
+  }
+  .job-status-chip:hover { background: var(--surface-hover); }
+  .job-status-chip:has(input:checked) {
+    background: var(--text); color: white; border-color: var(--text);
+  }
+  .job-status-chip input { accent-color: white; cursor: pointer; }
+  .job-status-chip:has(input:checked) input { accent-color: white; }
+  .job-status-chip .count {
+    font-size: 11px; opacity: 0.7;
+    padding: 0 4px; border-radius: 4px;
+    font-feature-settings: "tnum";
+  }
   .filter-chip {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 5px 10px; border-radius: 5px; font-size: 12px;
@@ -2141,16 +2160,10 @@
           <input class="search-input" id="jobSearch" placeholder="🔍 Search by job number, fleet, or customer…" oninput="renderJobs()" />
         </div>
       </header>
-      <div class="toolbar">
+      <div class="toolbar" style="margin-bottom: 12px;">
         <div class="filter-group">
           <select class="input" id="jobCustomerFilter" style="width: auto;" onchange="renderJobs()">
             <option value="">All customers</option>
-          </select>
-          <select class="input" id="jobStatusFilter" style="width: auto;" onchange="renderJobs()">
-            <option value="active">Active only</option>
-            <option value="all">All statuses</option>
-            <option value="completed">Completed</option>
-            <option value="on_hold">On hold</option>
           </select>
           <select class="input" id="jobFleetFilter" style="width: auto;" onchange="renderJobs()">
             <option value="">All fleets</option>
@@ -2158,6 +2171,18 @@
         </div>
         <div class="small-muted" id="jobCount">—</div>
       </div>
+
+      <!-- Status checkbox chips -->
+      <div class="filter-bar" id="jobStatusChips">
+        <label class="job-status-chip"><input type="checkbox" data-status="active" checked onchange="renderJobs()"> Active <span class="count" id="cntActive">0</span></label>
+        <label class="job-status-chip"><input type="checkbox" data-status="complete" onchange="renderJobs()"> Complete <span class="count" id="cntComplete">0</span></label>
+        <label class="job-status-chip"><input type="checkbox" data-status="hold" onchange="renderJobs()"> Hold <span class="count" id="cntHold">0</span></label>
+        <label class="job-status-chip"><input type="checkbox" data-status="cancelled" onchange="renderJobs()"> Cancelled <span class="count" id="cntCancelled">0</span></label>
+        <label class="job-status-chip"><input type="checkbox" data-status="archived" onchange="renderJobs()"> Archived <span class="count" id="cntArchived">0</span></label>
+      </div>
+
+      <!-- Hidden legacy filter (kept for code compatibility) -->
+      <select id="jobStatusFilter" style="display: none;"><option value="active" selected>active</option></select>
       <div class="card" style="padding: 0; overflow: hidden;">
         <table class="data" id="jobsTable">
           <thead><tr>
@@ -3140,13 +3165,40 @@ function renderJobCustomerFilter() {
 
 function renderJobs() {
   const search = (document.getElementById('jobSearch').value || '').toLowerCase();
-  const statusFilter = document.getElementById('jobStatusFilter').value;
   const fleetFilter = document.getElementById('jobFleetFilter').value.toLowerCase();
   const customerFilter = (document.getElementById('jobCustomerFilter')?.value || '').toLowerCase();
 
+  // Read which status chips are checked
+  const statusChips = Array.from(document.querySelectorAll('#jobStatusChips input[type="checkbox"]'))
+    .filter(cb => cb.checked).map(cb => cb.dataset.status);
+
+  // Helper: does a job match any of the checked status buckets?
+  const matchesStatusBucket = (j) => {
+    if (statusChips.length === 0) return true; // none checked → show all (no filter)
+    const s = (j.status || '').toLowerCase();
+    for (const bucket of statusChips) {
+      if (bucket === 'active' && ['in_progress','pending','new','scheduled'].includes(s)) return true;
+      if (bucket === 'complete' && s === 'completed') return true;
+      if (bucket === 'hold' && ['on_hold','blocked','qc_review'].includes(s)) return true;
+      if (bucket === 'cancelled' && s === 'cancelled') return true;
+      if (bucket === 'archived' && (j.archived === true || (s === 'completed' && j.completed_at && (Date.now() - new Date(j.completed_at).getTime()) > 90 * 24 * 60 * 60 * 1000))) return true;
+    }
+    return false;
+  };
+
+  // Update chip counts (against the unfiltered jobs set)
+  const setCount = (id, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = state.jobs.filter(fn).length;
+  };
+  setCount('cntActive', j => ['in_progress','pending','new','scheduled'].includes(j.status));
+  setCount('cntComplete', j => j.status === 'completed');
+  setCount('cntHold', j => ['on_hold','blocked','qc_review'].includes(j.status));
+  setCount('cntCancelled', j => j.status === 'cancelled');
+  setCount('cntArchived', j => j.archived === true || (j.status === 'completed' && j.completed_at && (Date.now() - new Date(j.completed_at).getTime()) > 90 * 24 * 60 * 60 * 1000));
+
   let rows = state.jobs.slice();
-  if (statusFilter === 'active') rows = rows.filter(j => !['completed','cancelled'].includes(j.status));
-  else if (statusFilter !== 'all') rows = rows.filter(j => j.status === statusFilter);
+  rows = rows.filter(matchesStatusBucket);
   if (customerFilter) rows = rows.filter(j => (j.customer_name || '').toLowerCase() === customerFilter);
   if (search) rows = rows.filter(j => JSON.stringify(j).toLowerCase().includes(search));
   if (fleetFilter) rows = rows.filter(j => JSON.stringify(j).toLowerCase().includes(fleetFilter));

@@ -1088,9 +1088,11 @@
     overflow-y: auto;
   }
   .logo {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 17px; font-weight: 700; color: var(--text);
-    padding: 4px 8px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: flex-start;
+    padding: 0 4px; margin-bottom: 24px;
+  }
+  .logo svg {
+    max-width: 100%; height: auto;
   }
   .logo-mark {
     width: 28px; height: 28px; border-radius: 8px;
@@ -1475,8 +1477,39 @@
   <!-- ============= SIDEBAR ============= -->
   <aside class="sidebar">
     <div class="logo">
-      <div class="logo-mark">P</div>
-      <span>PSI Ops Portal</span>
+      <svg viewBox="0 0 200 100" width="180" height="80" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+        <!-- Cream background -->
+        <rect width="200" height="100" rx="8" fill="#f1e7d0"/>
+
+        <!-- Oil pump jack on left -->
+        <g transform="translate(8, 14)" fill="#0a0a0a">
+          <!-- Base/ground -->
+          <rect x="0" y="64" width="42" height="6"/>
+          <!-- Tower (triangular) -->
+          <polygon points="6,64 18,12 30,64"/>
+          <!-- Tower interior cutout (white triangle) -->
+          <polygon points="11,60 18,22 25,60" fill="#f1e7d0"/>
+          <!-- Rungs (ladder) -->
+          <line x1="14" y1="40" x2="22" y2="40" stroke="#0a0a0a" stroke-width="1.5"/>
+          <line x1="13" y1="48" x2="23" y2="48" stroke="#0a0a0a" stroke-width="1.5"/>
+          <line x1="12" y1="56" x2="24" y2="56" stroke="#0a0a0a" stroke-width="1.5"/>
+          <!-- Walking beam (top horizontal arm) -->
+          <rect x="3" y="8" width="34" height="6"/>
+          <!-- Horse head -->
+          <polygon points="0,4 10,4 10,16 6,18 0,16"/>
+          <!-- Counterweight at back -->
+          <rect x="32" y="16" width="8" height="14"/>
+          <!-- Pivot circle -->
+          <circle cx="18" cy="11" r="3"/>
+        </g>
+
+        <!-- "PSI" big red letters -->
+        <text x="62" y="62" font-family="Impact, 'Arial Black', sans-serif" font-size="56" font-weight="900" fill="#dc2626" letter-spacing="-1">PSI</text>
+
+        <!-- "OILFIELD SERVICES" red banner -->
+        <rect x="58" y="72" width="132" height="16" fill="#dc2626" rx="2"/>
+        <text x="124" y="83" font-family="Arial, sans-serif" font-size="11" font-weight="800" fill="white" text-anchor="middle" letter-spacing="2">OILFIELD SERVICES</text>
+      </svg>
     </div>
 
     <nav class="sidenav">
@@ -2126,9 +2159,6 @@
               <div class="input-label">Source 02</div>
               <div class="input-name">IronTrac Export</div>
               <span class="input-cadence scheduled">SCHEDULED · DAILY</span>
-              <div class="input-flow">
-                Manual XLSX export → <code>update_jobs.js</code> script → upserts into <code>jobs</code> table (preserves manual edits)
-              </div>
               <div class="input-captures">
                 <div class="input-captures-label">What it captures</div>
                 <div class="input-captures-list">Active and historical jobs, status, customer assignments, start dates, completed work</div>

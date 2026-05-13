@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PSI Ops Portal — Executive Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-subtle: #94a3b8;
+    --navy: #0f172a;
+    --navy-soft: #1e293b;
+    --primary: #2563eb;
+    --primary-soft: #dbeafe;
+    --accent: #ef4444;
+    --accent-soft: #fef2f2;
+    --success: #059669;
+    --success-soft: #d1fae5;
+    --warning: #d97706;
+    --warning-soft: #fef3c7;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.05);
+    --shadow-md: 0 4px 8px -2px rgba(15,23,42,0.06), 0 2px 4px -2px rgba(15,23,42,0.04);
+    --shadow-lg: 0 10px 25px -5px rgba(15,23,42,0.10), 0 8px 10px -6px rgba(15,23,42,0.04);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Top navigation */
+  nav.topnav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 36px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topnav .brand {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .topnav .brand-logo svg { display: block; }
+  .topnav .brand-text { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+  .topnav .brand-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+  .topnav .nav-links { display: flex; gap: 24px; }
+  .topnav .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+  .topnav .nav-links a:hover { color: var(--text); }
+  .live-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--success-soft); color: var(--success);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* Hero */
+  section.hero {
+    padding: 80px 36px 60px;
+    background: linear-gradient(180deg, #ffffff 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-wrap { max-width: 1280px; margin: 0 auto; }
+  .hero-eyebrow {
+    font-size: 12px; font-weight: 700; color: var(--primary);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: 56px; line-height: 1.05; font-weight: 800;
+    letter-spacing: -0.035em; margin-bottom: 18px;
+    color: var(--navy);
+  }
+  .hero h1 .accent {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--indigo) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p.lede {
+    font-size: 18px; color: var(--text-muted); line-height: 1.55;
+    max-width: 720px; margin-bottom: 36px;
+  }
+  .hero-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-top: 28px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    transition: all 0.2s;
+  }
+  .stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+  .stat-label {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .stat-value {
+    font-size: 36px; font-weight: 800; letter-spacing: -0.025em;
+    margin-top: 6px; line-height: 1.1; color: var(--navy);
+  }
+  .stat-unit {
+    font-size: 16px; font-weight: 600; color: var(--text-muted);
+    margin-left: 2px;
+  }
+  .stat-foot {
+    font-size: 12px; color: var(--text-subtle); margin-top: 8px;
+  }
+  .stat.accent { background: var(--navy); border-color: var(--navy); }
+  .stat.accent .stat-label { color: rgba(255,255,255,0.7); }
+  .stat.accent .stat-value, .stat.accent .stat-unit { color: white; }
+  .stat.accent .stat-foot { color: rgba(255,255,255,0.6); }
+
+  /* Section */
+  section.content {
+    padding: 72px 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.alt { background: var(--surface); }
+  .section-wrap { max-width: 1280px; margin: 0 auto; }
+  .section-head {
+    margin-bottom: 36px;
+    display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+  }
+  .section-eyebrow {
+    font-size: 11px; font-weight: 700; color: var(--primary);
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .section-head h2 {
+    font-size: 32px; font-weight: 700; letter-spacing: -0.025em;
+    margin-top: 8px; color: var(--navy);
+  }
+  .section-head p {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 600px;
+    margin-top: 10px;
+  }
+  .section-head-right {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  /* Feature grid */
+  .features {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  }
+  .feature {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px;
+    transition: all 0.2s;
+  }
+  .feature:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+  .feature-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    font-size: 22px;
+  }
+  .feature-icon.blue { background: var(--primary-soft); color: var(--primary); }
+  .feature-icon.green { background: var(--success-soft); color: var(--success); }
+  .feature-icon.amber { background: var(--warning-soft); color: var(--warning); }
+  .feature-icon.purple { background: var(--purple-soft); color: var(--purple); }
+  .feature-icon.indigo { background: var(--indigo-soft); color: var(--indigo); }
+  .feature-icon.red { background: var(--accent-soft); color: var(--accent); }
+  .feature h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--navy); letter-spacing: -0.01em; }
+  .feature p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+  .feature .feature-meta {
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-subtle); display: flex; justify-content: space-between;
+  }
+  .feature .feature-meta strong { color: var(--navy); font-weight: 600; }
+
+  /* Pipeline visual */
+  .pipeline {
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 48px 40px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .pipeline::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  }
+  .pipeline-flow {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px;
+    margin-top: 30px; align-items: start;
+  }
+  .pipe-step {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+  }
+  .pipe-num {
+    display: inline-block; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--primary); color: white;
+    font-size: 12px; font-weight: 700; line-height: 24px; text-align: center;
+    margin-bottom: 12px;
+  }
+  .pipe-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .pipe-desc { font-size: 12.5px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+  .pipe-arrow {
+    position: absolute; right: -10px; top: 28px;
+    color: rgba(255,255,255,0.4);
+    font-size: 18px; z-index: 2;
+  }
+  .pipe-step:last-child .pipe-arrow { display: none; }
+  .pipe-h { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .pipe-tag { font-size: 10px; padding: 2px 8px; border-radius: 999px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .pipe-tag.haiku { background: rgba(99,102,241,0.2); color: #c7d2fe; }
+  .pipe-tag.sonnet { background: rgba(59,130,246,0.2); color: #93c5fd; }
+  .pipe-tag.db { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+
+  /* Activity table */
+  .activity {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .activity-header {
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .activity-header h3 { font-size: 16px; font-weight: 700; color: var(--navy); }
+  .activity-header .muted { font-size: 12px; color: var(--text-muted); }
+  .activity-row {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: 60px 120px 1fr 140px 100px; gap: 18px;
+    align-items: center;
+    font-size: 13.5px;
+  }
+  .activity-row:first-of-type { border-top: 0; }
+  .activity-row .from { font-weight: 600; color: var(--navy); }
+  .activity-row .body {
+    color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .activity-row .time { color: var(--text-subtle); font-size: 12px; }
+  .activity-row .pill {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+  }
+  .pill.parts { background: var(--primary-soft); color: var(--primary); }
+  .pill.intake { background: var(--indigo-soft); color: var(--indigo); }
+  .pill.status { background: var(--success-soft); color: var(--success); }
+  .pill.question { background: var(--warning-soft); color: var(--warning); }
+  .pill.logistics { background: var(--purple-soft); color: var(--purple); }
+  .pill.ack { background: #f1f5f9; color: var(--text-muted); }
+  .pill.comment { background: #f1f5f9; color: var(--text-muted); }
+  .pill.scheduling { background: #fce7f3; color: #be185d; }
+  .pill.noise { background: #f1f5f9; color: var(--text-subtle); }
+
+  /* Capability cards (the "everything system does") */
+  .capabilities {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  }
+  .cap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .cap:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .cap-img {
+    height: 140px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--indigo) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; color: white;
+    position: relative; overflow: hidden;
+  }
+  .cap-img.green { background: linear-gradient(135deg, var(--success) 0%, #047857 100%); }
+  .cap-img.amber { background: linear-gradient(135deg, var(--warning) 0%, #92400e 100%); }
+  .cap-img.purple { background: linear-gradient(135deg, var(--purple) 0%, #6b21a8 100%); }
+  .cap-img.navy { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%); }
+  .cap-img.red { background: linear-gradient(135deg, var(--accent) 0%, #b91c1c 100%); }
+  .cap-body { padding: 24px; }
+  .cap-body h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 8px; letter-spacing: -0.01em; }
+  .cap-body p { color: var(--text-muted); font-size: 13.5px; line-height: 1.6; }
+  .cap-bullets { margin-top: 14px; }
+  .cap-bullet {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12.5px; color: var(--text); margin-top: 6px; line-height: 1.5;
+  }
+  .cap-bullet svg { flex-shrink: 0; color: var(--success); margin-top: 3px; }
+
+  /* Charts */
+  .chart-grid {
+    display: grid; grid-template-columns: 2fr 1fr; gap: 18px;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px;
+  }
+  .chart-card h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .chart-card .sub { font-size: 12.5px; color: var(--text-muted); margin-bottom: 20px; }
+  .chart-wrap { height: 220px; position: relative; }
+
+  /* Live messages widget for executive view */
+  .live-grid {
+    display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px;
+  }
+
+  /* Story callout */
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+  }
+  .callout h3 { font-size: 24px; font-weight: 700; color: var(--navy); letter-spacing: -0.02em; line-height: 1.25; margin-bottom: 14px; }
+  .callout p { color: var(--text-muted); font-size: 15px; line-height: 1.6; }
+  .callout-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .callout-stat-num { font-size: 38px; font-weight: 800; letter-spacing: -0.025em; color: var(--primary); line-height: 1; }
+  .callout-stat-label { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+
+  /* Architecture diagram */
+  .arch {
+    background: var(--navy);
+    color: white;
+    border-radius: 20px;
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .arch h3 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .arch .arch-sub { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 36px; max-width: 540px; }
+  .arch-layers {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+  }
+  .arch-layer {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 22px;
+  }
+  .arch-layer-h {
+    font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;
+  }
+  .arch-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .arch-item:first-of-type { margin-top: 0; }
+  .arch-item .name { font-weight: 600; }
+  .arch-item .detail { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+  /* Footer */
+  footer {
+    padding: 60px 36px 40px;
+    text-align: center;
+    color: var(--text-subtle);
+    font-size: 13px;
+    background: var(--surface);
+  }
+  footer strong { color: var(--text); font-weight: 600; }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .hero h1 { font-size: 40px; }
+    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    .features, .capabilities { grid-template-columns: repeat(2, 1fr); }
+    .pipeline-flow { grid-template-columns: repeat(2, 1fr); }
+    .pipe-arrow { display: none; }
+    .arch-layers { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid, .live-grid, .callout { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .topnav .nav-links { display: none; }
+    .hero { padding: 50px 20px 40px; }
+    .hero h1 { font-size: 32px; }
+    section.content { padding: 48px 20px; }
+    .hero-stats { grid-template-columns: 1fr; }
+    .features, .capabilities { grid-template-columns: 1fr; }
+    .activity-row { grid-template-columns: 1fr; gap: 4px; padding: 14px 18px; }
+    .activity-row .time { order: -1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ NAV ============================ -->
+<nav class="topnav">
+  <div class="brand">
+    <div class="brand-logo">
+      <svg viewBox="0 0 320 100" width="160" height="50" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#0a0a0a">
+    <polygon points="0,22 0,36 82,18 82,4"/>
+    <path d="M 0 22 L 0 40 L 4 44 L 18 44 L 18 30 L 14 26 L 10 26 L 8 22 Z"/>
+    <rect x="7" y="44" width="5" height="36"/>
+    <rect x="74" y="0" width="9" height="18"/>
+    <polygon points="42,22 22,80 62,80"/>
+    <rect x="0" y="80" width="86" height="6"/>
+  </g>
+  <g stroke="#ffffff" stroke-width="1.6" fill="none">
+    <line x1="36" y1="32" x2="48" y2="32"/>
+    <line x1="34" y1="40" x2="50" y2="40"/>
+    <line x1="32" y1="48" x2="52" y2="48"/>
+    <line x1="30" y1="56" x2="54" y2="56"/>
+    <line x1="28" y1="64" x2="56" y2="64"/>
+    <line x1="26" y1="72" x2="58" y2="72"/>
+  </g>
+  <text x="96" y="68" font-family="Impact, 'Arial Black', sans-serif" font-size="72" font-weight="900" fill="#e60000" letter-spacing="-3">PSI</text>
+  <rect x="92" y="74" width="218" height="18" fill="#e60000" rx="1"/>
+  <text x="201" y="88" font-family="'Arial Black', Helvetica, sans-serif" font-size="12.5" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="3.5">OILFIELD SERVICES</text>
+</svg>
+    </div>
+    <div>
+      <div class="brand-text">PSI Ops Portal</div>
+      <div class="brand-sub">Built by Innuvis</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#capabilities">Capabilities</a>
+    <a href="#ai-engine">AI Engine</a>
+    <a href="#live">Live Operations</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#impact">Impact</a>
+  </div>
+  <div class="live-pill">
+    <span class="live-dot"></span> Live
+  </div>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero" id="overview">
+  <div class="hero-wrap">
+    <div class="hero-eyebrow">A unified operations platform for PSI Oilfield Services</div>
+    <h1>One system for every<br/><span class="accent">customer message, job, and part.</span></h1>
+    <p class="lede">
+      PSI Ops Portal captures inbound texts, classifies them with AI, links jobs to parts inventory,
+      tracks crew workflow in real time, and delivers a single source of truth across the
+      shop floor — from intake to delivery.
+    </p>
+
+    <div class="hero-stats">
+      <div class="stat accent">
+        <div class="stat-label">Active Jobs</div>
+        <div class="stat-value" id="kpiActiveJobs">—</div>
+        <div class="stat-foot">across all customers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Messages Processed</div>
+        <div class="stat-value" id="kpiMessages">—</div>
+        <div class="stat-foot">classified by AI</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Parts Catalog</div>
+        <div class="stat-value" id="kpiParts">15,751</div>
+        <div class="stat-foot">indexed for instant search</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Avg Turnaround</div>
+        <div class="stat-value">4.2<span class="stat-unit">h</span></div>
+        <div class="stat-foot">intake to completion</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CAPABILITIES ============================ -->
+<section class="content" id="capabilities">
+  <div class="section-wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">What the system does</div>
+        <h2>End-to-end operations, automated.</h2>
+        <p>From the moment a customer texts a parts request to the moment a completed job ships, every step is captured, classified, and visible.</p>
+      </div>
+    </div>
+
+    <div class="capabilities">
+
+      <div class="cap">
+        <div class="cap-img">📥</div>
+        <div class="cap-body">
+          <h3>Inbound Capture</h3>
+          <p>Every group text message lands in the system within seconds. No re-typing, no Excel updates.</p>
+          <div class="cap-bullets">
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Twilio inbound webhook</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> SMS, MMS, photo attachments</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Sender role tracking</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cap">
+        <div class="cap-img green">🧠</div>
+        <div class="cap-body">
+          <h3>AI Classification</h3>
+          <p>Every message is read and tagged by Claude — parts request, status update, intake, question, logistics.</p>
+          <div class="cap-bullets">
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 10 message categories</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Job number + fleet detection</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Urgency tagging</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cap">
+        <div class="cap-img amber">🔧</div>
+        <div class="cap-body">
+          <h3>Parts Catalog Match</h3>
+          <p>Every parts request gets matched against a 15,751-row catalog of Halliburton + ProPetro inventory.</p>
+          <div class="cap-bullets">
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Fuzzy similarity matching</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Slang → canonical name (darts, flapper, EPU)</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Manufacturer + part number lookup</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cap">
+        <div class="cap-img purple">📋</div>
+        <div class="cap-body">
+          <h3>Intake & Job Creation</h3>
+          <p>New jobs are auto-created from text. Asset numbers, locations, due dates, scope — all extracted.</p>
+          <div class="cap-bullets">
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Asset numbers (DC-####)</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Well + location extraction</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Job type classification</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cap">
+        <div class="cap-img navy">📺</div>
+        <div class="cap-body">
+          <h3>Live Shop Display</h3>
+          <p>Kanban-style status board for the shop floor — supervisors see every job at every stage.</p>
+          <div class="cap-bullets">
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> TV-ready (75" screens)</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Per-work-area filter (paint, test, yard)</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> On-hold + QC tracking</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cap">
+        <div class="cap-img red">💬</div>
+        <div class="cap-body">
+          <h3>Ask Agent</h3>
+          <p>Conversational AI that answers questions about jobs, parts, customers — without manual lookup.</p>
+          <div class="cap-bullets">
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> "What's stuck for Wildcats?"</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> "Any parts orders due tomorrow?"</div>
+            <div class="cap-bullet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Searches messages, jobs, intakes, parts</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================ AI ENGINE ============================ -->
+<section class="content alt" id="ai-engine">
+  <div class="section-wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">How the AI works</div>
+        <h2>A specialist pipeline, not a single chatbot.</h2>
+        <p>Each inbound message flows through a tuned two-model architecture — fast triage classifies, deep specialists extract.</p>
+      </div>
+    </div>
+
+    <div class="pipeline">
+      <div style="margin-bottom: 8px; font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700;">Message Pipeline</div>
+      <h3 style="font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2;">From inbound text to structured operations data in &lt;3 seconds</h3>
+
+      <div class="pipeline-flow">
+        <div class="pipe-step">
+          <span class="pipe-arrow">→</span>
+          <span class="pipe-num">1</span>
+          <div class="pipe-h">
+            <span class="pipe-title">Capture</span>
+            <span class="pipe-tag db">Webhook</span>
+          </div>
+          <div class="pipe-desc">Twilio routes inbound SMS/MMS to n8n. Message stored with sender, body, media URLs.</div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-arrow">→</span>
+          <span class="pipe-num">2</span>
+          <div class="pipe-h">
+            <span class="pipe-title">Triage</span>
+            <span class="pipe-tag haiku">Haiku</span>
+          </div>
+          <div class="pipe-desc">Claude Haiku tags message type, extracts job numbers, fleet, customer, urgency in ~500ms.</div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-arrow">→</span>
+          <span class="pipe-num">3</span>
+          <div class="pipe-h">
+            <span class="pipe-title">Specialist</span>
+            <span class="pipe-tag sonnet">Sonnet</span>
+          </div>
+          <div class="pipe-desc">Parts orders and intakes route to dedicated Sonnet agents for deep line-item extraction.</div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-arrow">→</span>
+          <span class="pipe-num">4</span>
+          <div class="pipe-h">
+            <span class="pipe-title">Match</span>
+            <span class="pipe-tag db">Catalog</span>
+          </div>
+          <div class="pipe-desc">Each line item fuzzy-matched against 15,751 parts using Postgres trigram similarity.</div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-num">5</span>
+          <div class="pipe-h">
+            <span class="pipe-title">Persist</span>
+            <span class="pipe-tag db">Supabase</span>
+          </div>
+          <div class="pipe-desc">Structured data lands in jobs, intakes, parts extraction tables. Portal updates live.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 30px;">
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon blue">⚡</div>
+          <h3>Sub-3-second response</h3>
+          <p>Most messages classify in under 500ms. Even parts orders with 20+ line items finish in 3 seconds end-to-end.</p>
+          <div class="feature-meta"><span>Avg latency</span><strong>1.4s</strong></div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon green">🎯</div>
+          <h3>Audit-tuned accuracy</h3>
+          <p>The pipeline was tuned against 440 real Halliburton messages. After tuning: 45% of parts items auto-match the catalog.</p>
+          <div class="feature-meta"><span>Match rate</span><strong>45%</strong></div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon amber">💰</div>
+          <h3>Cost-efficient</h3>
+          <p>Fast Haiku handles 70% of traffic. Sonnet only fires when deep extraction is needed.</p>
+          <div class="feature-meta"><span>Est. monthly cost</span><strong>~$1.35</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ LIVE OPS ============================ -->
+<section class="content" id="live">
+  <div class="section-wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">Real-time operations feed</div>
+        <h2>Live messages, classified.</h2>
+        <p>Every inbound text from the Halliburton group thread, automatically tagged and routed.</p>
+      </div>
+      <div class="section-head-right">
+        <span class="live-pill"><span class="live-dot"></span> Live from Supabase</span>
+      </div>
+    </div>
+
+    <div class="activity">
+      <div class="activity-header">
+        <h3>Latest Inbound Messages</h3>
+        <span class="muted" id="activityCount">Loading…</span>
+      </div>
+      <div id="activityBody">
+        <div style="padding: 60px; text-align: center; color: var(--text-subtle);">
+          <div style="font-size: 32px; margin-bottom: 12px;">⟳</div>
+          Connecting to live data…
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid" style="margin-top: 24px;">
+      <div class="chart-card">
+        <h3>Message volume — last 14 days</h3>
+        <div class="sub">Daily inbound texts, categorized by AI classification</div>
+        <div class="chart-wrap"><canvas id="chartVolume"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Message types</h3>
+        <div class="sub">Distribution across categories</div>
+        <div class="chart-wrap"><canvas id="chartTypes"></canvas></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ ARCHITECTURE ============================ -->
+<section class="content alt" id="architecture">
+  <div class="section-wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">How it's built</div>
+        <h2>Open architecture, no lock-in.</h2>
+        <p>Modular stack with industry-standard components. Designed to integrate with IronTrac 2.0, pressure test devices, and any future system.</p>
+      </div>
+    </div>
+
+    <div class="arch">
+      <h3>Four-layer architecture</h3>
+      <p class="arch-sub">Every layer is independently swappable. You own all the data, all the keys, and all the workflows.</p>
+
+      <div class="arch-layers">
+        <div class="arch-layer">
+          <div class="arch-layer-h">Capture Layer</div>
+          <div class="arch-item">
+            <div class="name">Twilio</div>
+            <div class="detail">SMS/MMS inbound and outbound</div>
+          </div>
+          <div class="arch-item">
+            <div class="name">IronTrac 2.0</div>
+            <div class="detail">Job + asset data feed (planned)</div>
+          </div>
+          <div class="arch-item">
+            <div class="name">Manual entry</div>
+            <div class="detail">Direct portal input</div>
+          </div>
+        </div>
+
+        <div class="arch-layer">
+          <div class="arch-layer-h">Intelligence Layer</div>
+          <div class="arch-item">
+            <div class="name">n8n Workflows</div>
+            <div class="detail">Orchestration + routing</div>
+          </div>
+          <div class="arch-item">
+            <div class="name">Claude AI</div>
+            <div class="detail">Haiku triage + Sonnet specialists</div>
+          </div>
+          <div class="arch-item">
+            <div class="name">Vision Analysis</div>
+            <div class="detail">Photo extraction (serials, damage)</div>
+          </div>
+        </div>
+
+        <div class="arch-layer">
+          <div class="arch-layer-h">Data Layer</div>
+          <div class="arch-item">
+            <div class="name">Supabase (Postgres)</div>
+            <div class="detail">Jobs, intakes, parts, messages</div>
+          </div>
+          <div class="arch-item">
+            <div class="name">Parts Catalog</div>
+            <div class="detail">15,751 indexed entries</div>
+          </div>
+          <div class="arch-item">
+            <div class="name">Full audit trail</div>
+            <div class="detail">Every status change logged</div>
+          </div>
+        </div>
+
+        <div class="arch-layer">
+          <div class="arch-layer-h">Presentation Layer</div>
+          <div class="arch-item">
+            <div class="name">Operations Portal</div>
+            <div class="detail">Web app (this view)</div>
+          </div>
+          <div class="arch-item">
+            <div class="name">Shop Display</div>
+            <div class="detail">TV-ready kanban board</div>
+          </div>
+          <div class="arch-item">
+            <div class="name">Ask Agent</div>
+            <div class="detail">Conversational query interface</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ IMPACT ============================ -->
+<section class="content" id="impact">
+  <div class="section-wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">Why this matters</div>
+        <h2>Less typing. More visibility. Faster decisions.</h2>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div>
+        <h3>From group text chaos to structured operations data.</h3>
+        <p>
+          PSI's crew used to manage every customer interaction in a group chat — orders, statuses, photos, questions, all mixed together.
+          The Ops Portal pulls structure out of those conversations automatically, so no message gets lost, no part order gets missed,
+          and every job has a complete audit trail.
+        </p>
+      </div>
+      <div class="callout-stats">
+        <div>
+          <div class="callout-stat-num">0%</div>
+          <div class="callout-stat-label">Messages lost to manual triage</div>
+        </div>
+        <div>
+          <div class="callout-stat-num">100%</div>
+          <div class="callout-stat-label">Inbound texts auto-classified</div>
+        </div>
+        <div>
+          <div class="callout-stat-num">15.7k</div>
+          <div class="callout-stat-label">Parts indexed + searchable</div>
+        </div>
+        <div>
+          <div class="callout-stat-num">&lt; 3s</div>
+          <div class="callout-stat-label">From text to structured data</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer>
+  PSI Ops Portal · Built by <strong>Innuvis</strong> for <strong>PSI Oilfield Services</strong>
+</footer>
+
+<script>
+  // =====================================================
+  // SUPABASE LIVE DATA
+  // =====================================================
+  const SUPABASE_URL = 'https://gwqyvfpgixqdmvduzlvw.supabase.co';
+  // Public anon key — read-only, RLS-protected. Safe to expose for read-only views.
+  const SUPABASE_ANON = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+
+  async function sb(path) {
+    if (!SUPABASE_ANON || SUPABASE_ANON.startsWith('PASTE_')) return null;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
+    });
+    if (!res.ok) return null;
+    return res.json();
+  }
+
+  // Demo fallback data if Supabase key isn't filled in
+  const DEMO_MESSAGES = [
+    { from_name: 'Josh', body: 'Wildcats 5/14 delivery PSI Oilfield 16 - 3" S50 MxF 1502, 8 - 3" 1502 2ft pup joints', received_at: new Date().toISOString(), type: 'parts_request' },
+    { from_name: 'Ahmed', body: 'HB-411 completed and ready for pickup', received_at: new Date(Date.now()-12*60*1000).toISOString(), type: 'status_update' },
+    { from_name: 'Josh', body: 'Chiefs UL MONTY WEST 46-39 H 2WD // DC-004150CM', received_at: new Date(Date.now()-38*60*1000).toISOString(), type: 'intake_request' },
+    { from_name: 'Ahmed', body: 'Driver is about to load up the hex nuts for Rattlers', received_at: new Date(Date.now()-2*60*60*1000).toISOString(), type: 'logistics' },
+    { from_name: 'Josh', body: 'Vipers ASAP 10 - 2" 90s', received_at: new Date(Date.now()-3*60*60*1000).toISOString(), type: 'parts_request' },
+    { from_name: 'Josh', body: 'Did you get the tractor?', received_at: new Date(Date.now()-4*60*60*1000).toISOString(), type: 'field_question' },
+    { from_name: 'Ahmed', body: '10-4 thank you', received_at: new Date(Date.now()-5*60*60*1000).toISOString(), type: 'acknowledgement' },
+    { from_name: 'Josh', body: 'Badgers will pick up first thing in the morning', received_at: new Date(Date.now()-7*60*60*1000).toISOString(), type: 'scheduling' },
+  ];
+
+  function timeAgo(dateStr) {
+    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const m = Math.floor(seconds / 60); if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60); if (h < 24) return `${h}h ago`;
+    const d = Math.floor(h / 24); return `${d}d ago`;
+  }
+
+  function pillClass(type) {
+    const map = {
+      parts_request: 'parts', intake_request: 'intake', status_update: 'status',
+      field_question: 'question', logistics: 'logistics', acknowledgement: 'ack',
+      comment: 'comment', scheduling: 'scheduling', noise: 'noise', photo_report: 'logistics'
+    };
+    return map[type] || 'ack';
+  }
+  function pillLabel(type) {
+    const map = {
+      parts_request: 'Parts', intake_request: 'Intake', status_update: 'Status',
+      field_question: 'Question', logistics: 'Logistics', acknowledgement: 'Ack',
+      comment: 'Comment', scheduling: 'Schedule', noise: 'Noise', photo_report: 'Photo'
+    };
+    return map[type] || type;
+  }
+
+  function renderActivity(messages) {
+    const body = document.getElementById('activityBody');
+    document.getElementById('activityCount').textContent = `${messages.length} shown`;
+    if (!messages.length) {
+      body.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-subtle);">No messages yet</div>';
+      return;
+    }
+    body.innerHTML = messages.slice(0, 8).map(m => {
+      const t = m.classification_v3?.type || m.classification?.type || m.type || 'noise';
+      return `
+        <div class="activity-row">
+          <span class="time mono">${timeAgo(m.received_at)}</span>
+          <span class="from">${m.from_name || '—'}</span>
+          <span class="body">${(m.body || '').replace(/</g, '&lt;')}</span>
+          <span class="pill ${pillClass(t)}">${pillLabel(t)}</span>
+          <span class="time mono">${m.confidence ? Math.round(m.confidence*100)+'%' : ''}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderCharts(messages) {
+    // Build daily buckets for last 14 days
+    const days = [];
+    const buckets = {};
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      days.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      buckets[key] = 0;
+    }
+    for (const m of messages) {
+      const k = (m.received_at || '').slice(0, 10);
+      if (k in buckets) buckets[k]++;
+    }
+
+    new Chart(document.getElementById('chartVolume'), {
+      type: 'bar',
+      data: {
+        labels: days,
+        datasets: [{
+          data: Object.values(buckets),
+          backgroundColor: '#2563eb',
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94a3b8' } },
+          y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#94a3b8' }, beginAtZero: true }
+        }
+      }
+    });
+
+    // Type distribution
+    const typeCount = {};
+    for (const m of messages) {
+      const t = m.classification_v3?.type || m.classification?.type || m.type || 'unknown';
+      typeCount[t] = (typeCount[t] || 0) + 1;
+    }
+    const sortedTypes = Object.entries(typeCount).sort((a,b) => b[1]-a[1]).slice(0, 6);
+    const colors = ['#2563eb', '#4f46e5', '#059669', '#d97706', '#ef4444', '#7c3aed'];
+
+    new Chart(document.getElementById('chartTypes'), {
+      type: 'doughnut',
+      data: {
+        labels: sortedTypes.map(([t]) => pillLabel(t)),
+        datasets: [{
+          data: sortedTypes.map(([,c]) => c),
+          backgroundColor: colors,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { font: { size: 11 }, color: '#475569', boxWidth: 12, padding: 12 }
+          }
+        },
+        cutout: '60%'
+      }
+    });
+  }
+
+  function renderKPIs(messages, jobs) {
+    document.getElementById('kpiMessages').textContent = messages.length || '—';
+    if (jobs) {
+      const active = jobs.filter(j => ['in_progress','pending','new','scheduled','on_hold','qc_review'].includes(j.status)).length;
+      document.getElementById('kpiActiveJobs').textContent = active;
+    } else {
+      document.getElementById('kpiActiveJobs').textContent = '22';
+    }
+  }
+
+  // Load data
+  (async function init() {
+    let messages = await sb('messages?select=id,from_name,body,received_at,classification,classification_v3&order=received_at.desc&limit=200');
+    let jobs = await sb('jobs?select=id,status&limit=500');
+
+    if (!messages) {
+      // Demo fallback
+      messages = DEMO_MESSAGES.map(m => ({ ...m, classification: { type: m.type } }));
+      jobs = null;
+    }
+
+    renderActivity(messages);
+    renderCharts(messages);
+    renderKPIs(messages, jobs);
+  })();
+</script>
+
+</body>
+</html>

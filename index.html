@@ -1674,31 +1674,7 @@
   <!-- ============= SIDEBAR ============= -->
   <aside class="sidebar">
     <div class="logo">
-      <svg viewBox="0 0 1700 540" width="220" height="70" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="display: block;">
-  <g fill="#000000">
-    <path d="M 30 70 L 280 70 L 280 220 L 240 260 L 240 320 L 140 320 L 140 260 L 30 260 Z"/>
-    <polygon points="240,120 600,50 600,10 240,70"/>
-    <rect x="555" y="0" width="60" height="95"/>
-    <rect x="140" y="320" width="100" height="120"/>
-    <rect x="0" y="430" width="640" height="30"/>
-  </g>
-  <text x="540" y="430" font-family="Impact, 'Arial Black', sans-serif" font-size="540" font-weight="900" fill="#ffffff" stroke="#000000" stroke-width="12" stroke-linejoin="round" letter-spacing="-34">PSI</text>
-  <text x="540" y="430" font-family="Impact, 'Arial Black', sans-serif" font-size="540" font-weight="900" fill="#e60000" letter-spacing="-34">PSI</text>
-  <g fill="#000000">
-    <polygon points="430,120 290,430 580,430"/>
-  </g>
-  <g stroke="#ffffff" stroke-width="10" fill="none">
-    <line x1="370" y1="200" x2="490" y2="200"/>
-    <line x1="360" y1="255" x2="500" y2="255"/>
-    <line x1="350" y1="310" x2="510" y2="310"/>
-    <line x1="340" y1="365" x2="520" y2="365"/>
-    <line x1="330" y1="410" x2="530" y2="410"/>
-  </g>
-  <rect x="380" y="430" width="14" height="100" fill="#000000"/>
-  <rect x="1610" y="430" width="14" height="100" fill="#000000"/>
-  <rect x="380" y="445" width="1244" height="80" fill="#e60000" stroke="#000000" stroke-width="4"/>
-  <text x="1002" y="503" font-family="'Arial Black', Helvetica, sans-serif" font-size="54" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="16">OILFIELD SERVICES</text>
-</svg>
+      <img src="psi-logo.png" alt="PSI Oilfield Services" style="height: 70px; width: auto; display: block;">
     </div>
 
     <div class="search-box">
@@ -1726,9 +1702,13 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="conn-status">
+      <div class="conn-status" id="connStatus" title="Connection status">
         <span class="dot live" id="connDot"></span>
-        <span id="connText">Connected</span>
+        <span id="connText" style="display:none;">Connected</span>
+        <div style="display:flex; align-items:center; gap:8px; font-size:11px; color:var(--text-muted);">
+          <span>Built by</span>
+          <img src="innuvis-logo.png" alt="Innuvis" style="height: 18px; width: auto; display: inline-block; vertical-align: middle;">
+        </div>
       </div>
     </div>
   </aside>
@@ -6337,31 +6317,7 @@ function playIntro() {
     </svg>`;
 
   const psiLogo = `
-    <svg viewBox="0 0 1700 540" xmlns="http://www.w3.org/2000/svg" style="width: min(80vw, 700px);">
-      <g fill="#ffffff">
-        <path d="M 30 70 L 280 70 L 280 220 L 240 260 L 240 320 L 140 320 L 30 260 Z"/>
-        <polygon points="240,120 600,50 600,10 240,70"/>
-        <rect x="555" y="0" width="60" height="95"/>
-        <rect x="140" y="320" width="100" height="120"/>
-        <rect x="0" y="430" width="640" height="30"/>
-      </g>
-      <text x="540" y="430" font-family="Impact, 'Arial Black', sans-serif" font-size="540" font-weight="900" fill="#ffffff" stroke="#ffffff" stroke-width="12" stroke-linejoin="round" letter-spacing="-34">PSI</text>
-      <text x="540" y="430" font-family="Impact, 'Arial Black', sans-serif" font-size="540" font-weight="900" fill="#e60000" letter-spacing="-34">PSI</text>
-      <g fill="#ffffff">
-        <polygon points="430,120 290,430 580,430"/>
-      </g>
-      <g stroke="#000000" stroke-width="10" fill="none">
-        <line x1="370" y1="200" x2="490" y2="200"/>
-        <line x1="360" y1="255" x2="500" y2="255"/>
-        <line x1="350" y1="310" x2="510" y2="310"/>
-        <line x1="340" y1="365" x2="520" y2="365"/>
-        <line x1="330" y1="410" x2="530" y2="410"/>
-      </g>
-      <rect x="380" y="430" width="14" height="100" fill="#ffffff"/>
-      <rect x="1610" y="430" width="14" height="100" fill="#ffffff"/>
-      <rect x="380" y="445" width="1244" height="80" fill="#e60000" stroke="#ffffff" stroke-width="4"/>
-      <text x="1002" y="503" font-family="'Arial Black', Helvetica, sans-serif" font-size="54" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="16">OILFIELD SERVICES</text>
-    </svg>`;
+    <img src="psi-logo.png" alt="PSI Oilfield Services" style="width: min(80vw, 700px); height: auto; display: block;">`;
 
   // ====== Text sequence ======
   const sequence = [

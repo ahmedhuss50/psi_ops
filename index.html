@@ -6476,19 +6476,14 @@ function startApp() {
   startDisplayRefresh(); // shop display has its own faster refresh cadence
 }
 
-// Skip if URL says ?nointro or if seen this session
-const skipIntro = (
-  new URLSearchParams(location.search).has('nointro') ||
-  sessionStorage.getItem('psihub_intro_seen') === '1'
-);
+// Intro is disabled — portal loads directly. To re-enable: remove the line below.
+const skipIntro = true;
 
 if (skipIntro) {
   document.getElementById('intro').style.display = 'none';
   startApp();
 } else {
-  // Mark seen so reload doesn't replay during the demo
   sessionStorage.setItem('psihub_intro_seen', '1');
-  // Wait for user click (Start button is visible) — beginShow() triggers playIntro()
 }
 </script>
 </body>

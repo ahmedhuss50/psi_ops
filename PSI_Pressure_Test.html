@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>PSI Pressure Test — Live Transducer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface-2: #1f2937;
+    --border: #374151;
+    --text: #f9fafb;
+    --text-muted: #9ca3af;
+    --text-subtle: #6b7280;
+    --accent: #ef4444;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --primary: #3b82f6;
+    --primary-dim: #1e3a8a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 30px;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .title-wrap h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+  .title-wrap .sub { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+  .device-status {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+  }
+  .status-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--text-subtle);
+  }
+  .status-dot.connected { background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
+  .status-dot.demo { background: var(--warning); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  /* Asset card */
+  .asset-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+    margin-bottom: 20px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 24px;
+  }
+  .asset-field-label {
+    font-size: 11px; color: var(--text-muted); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .asset-field-value { font-size: 18px; font-weight: 700; margin-top: 6px; }
+  .asset-field-value.large { font-size: 22px; }
+
+  /* Main test layout */
+  .test-grid {
+    display: grid; grid-template-columns: 320px 1fr; gap: 20px;
+  }
+  @media (max-width: 1000px) { .test-grid { grid-template-columns: 1fr; } }
+
+  /* Gauge / current reading */
+  .gauge-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 28px; text-align: center;
+  }
+  .gauge-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  .gauge-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 64px; font-weight: 700;
+    margin-top: 10px; line-height: 1;
+    color: var(--success);
+    transition: color 0.2s;
+  }
+  .gauge-value.high { color: var(--warning); }
+  .gauge-value.critical { color: var(--accent); }
+  .gauge-unit { font-size: 18px; color: var(--text-muted); font-weight: 500; margin-top: 6px; }
+  .gauge-mini {
+    margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .gauge-mini-item {
+    background: var(--surface-2); border-radius: 8px; padding: 12px;
+    text-align: left;
+  }
+  .gauge-mini-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .gauge-mini-value { font-size: 18px; font-weight: 700; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* Chart */
+  .chart-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+  }
+  .chart-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .chart-title { font-size: 15px; font-weight: 700; }
+  .chart-sub { font-size: 12px; color: var(--text-muted); }
+  .chart-wrap { position: relative; height: 360px; }
+
+  /* Controls */
+  .controls {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-top: 18px;
+  }
+  .btn {
+    padding: 10px 22px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn:hover { background: var(--border); }
+  .btn.primary {
+    background: var(--primary); border-color: var(--primary);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.3), 0 4px 12px rgba(59,130,246,0.2);
+  }
+  .btn.primary:hover { opacity: 0.95; }
+  .btn.danger { background: var(--accent); border-color: var(--accent); }
+  .btn.success { background: var(--success); border-color: var(--success); color: white; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Test protocol bar */
+  .protocol-bar {
+    margin-top: 16px; padding: 16px;
+    background: var(--surface-2); border-radius: 10px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .protocol-step {
+    text-align: center; padding: 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .protocol-step.active {
+    border-color: var(--primary); background: var(--primary-dim);
+  }
+  .protocol-step.done { border-color: var(--success); }
+  .protocol-step .stage-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+  .protocol-step .stage-value { font-size: 16px; font-weight: 700; margin-top: 4px; }
+
+  /* Setup tip */
+  .setup-tip {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 13px; color: var(--warning);
+    display: flex; gap: 10px;
+  }
+  .setup-tip strong { color: white; }
+
+  /* Modes */
+  .mode-selector { display: flex; gap: 6px; }
+  .mode-btn {
+    padding: 6px 12px; border-radius: 6px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text-muted); font-size: 12px; font-weight: 500;
+    cursor: pointer;
+  }
+  .mode-btn.active {
+    background: var(--primary); border-color: var(--primary); color: white;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Setup tip -->
+  <div class="setup-tip" id="setupTip">
+    <span>💡</span>
+    <span><strong>Demo mode active</strong> — simulates a 15K PSI test on a 3" 1502 hammer union. Click "Connect GP:50 Transducer" once you have the device plugged in via USB.</span>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="title-wrap">
+      <h1>Pressure Test — HB-411</h1>
+      <div class="sub">3" 1502 Hammer Union · Halliburton · Wildcats · Test Booth Bay 3</div>
+    </div>
+    <div class="device-status">
+      <span class="status-dot demo" id="statusDot"></span>
+      <span id="statusText">Demo Mode</span>
+      <div class="mode-selector" style="margin-left: 12px;">
+        <button class="mode-btn active" id="modeDemo" onclick="setMode('demo')">Demo</button>
+        <button class="mode-btn" id="modeLive" onclick="connectTransducer()">Live</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Asset info -->
+  <div class="asset-card">
+    <div>
+      <div class="asset-field-label">Asset</div>
+      <div class="asset-field-value large mono">HB-411</div>
+    </div>
+    <div>
+      <div class="asset-field-label">Part Type</div>
+      <div class="asset-field-value">3" 1502 MxF Hammer Union</div>
+    </div>
+    <div>
+      <div class="asset-field-label">Rated Working Pressure</div>
+      <div class="asset-field-value">15,000 PSI</div>
+    </div>
+    <div>
+      <div class="asset-field-label">Test Pressure</div>
+      <div class="asset-field-value">22,500 PSI (1.5×)</div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="test-grid">
+
+    <!-- Live gauge -->
+    <div class="gauge-card">
+      <div class="gauge-label">Current Pressure</div>
+      <div class="gauge-value" id="currentPSI">0</div>
+      <div class="gauge-unit">PSI</div>
+
+      <div class="gauge-mini">
+        <div class="gauge-mini-item">
+          <div class="gauge-mini-label">Peak</div>
+          <div class="gauge-mini-value" id="peakPSI">0</div>
+        </div>
+        <div class="gauge-mini-item">
+          <div class="gauge-mini-label">Hold Avg</div>
+          <div class="gauge-mini-value" id="holdPSI">—</div>
+        </div>
+        <div class="gauge-mini-item">
+          <div class="gauge-mini-label">Decay</div>
+          <div class="gauge-mini-value" id="decayPSI">—</div>
+        </div>
+        <div class="gauge-mini-item">
+          <div class="gauge-mini-label">Duration</div>
+          <div class="gauge-mini-value" id="duration">0:00</div>
+        </div>
+      </div>
+
+      <div class="controls" style="margin-top: 24px; justify-content: center;">
+        <button class="btn primary" id="startBtn" onclick="startTest()">▶ Start Test</button>
+        <button class="btn" id="stopBtn" onclick="stopTest()" disabled>⏸ Stop</button>
+      </div>
+      <div class="controls" style="margin-top: 8px; justify-content: center;">
+        <button class="btn success" id="saveBtn" onclick="saveTest()" disabled>✓ Save Test</button>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Pressure vs Time</div>
+          <div class="chart-sub" id="chartSub">Waiting to start...</div>
+        </div>
+        <div class="chart-sub mono" id="sampleCount">0 samples</div>
+      </div>
+      <div class="chart-wrap"><canvas id="pressureChart"></canvas></div>
+
+      <div class="protocol-bar">
+        <div class="protocol-step" id="stageRamp">
+          <div class="stage-label">Stage 1 — Ramp Up</div>
+          <div class="stage-value">→ 22,500 PSI</div>
+        </div>
+        <div class="protocol-step" id="stageHold">
+          <div class="stage-label">Stage 2 — Hold</div>
+          <div class="stage-value">3 min</div>
+        </div>
+        <div class="protocol-step" id="stageDecay">
+          <div class="stage-label">Stage 3 — Decay Check</div>
+          <div class="stage-value">&lt; 50 PSI drop</div>
+        </div>
+        <div class="protocol-step" id="stageDone">
+          <div class="stage-label">Stage 4 — Verdict</div>
+          <div class="stage-value" id="stageVerdict">Pending</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ============================================
+  // STATE
+  // ============================================
+  let mode = 'demo'; // 'demo' | 'live'
+  let serialPort = null;
+  let serialReader = null;
+  let running = false;
+  let samples = [];
+  let testStartTime = 0;
+  let currentStage = 0; // 0=idle, 1=ramp, 2=hold, 3=decay, 4=done
+  let holdStartIdx = 0;
+  let holdEndIdx = 0;
+
+  const TEST_TARGET = 22500;
+  const HOLD_DURATION_S = 180;
+  const HOLD_TOLERANCE = 50; // PSI drop allowed during hold
+
+  // ============================================
+  // CHART
+  // ============================================
+  const ctx = document.getElementById('pressureChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'PSI',
+        data: [],
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        borderWidth: 2,
+      }, {
+        label: 'Test Pressure Target',
+        data: [],
+        borderColor: '#10b981',
+        borderDash: [6, 6],
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+      }]
+    },
+    options: {
+      animation: false,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: 'index', intersect: false },
+      },
+      scales: {
+        x: {
+          grid: { color: '#1f2937' },
+          ticks: { color: '#6b7280', font: { size: 10 } },
+        },
+        y: {
+          beginAtZero: true,
+          suggestedMax: 25000,
+          grid: { color: '#1f2937' },
+          ticks: {
+            color: '#9ca3af',
+            font: { family: 'JetBrains Mono' },
+            callback: (val) => val.toLocaleString() + ' PSI',
+          },
+        },
+      },
+    }
+  });
+
+  // ============================================
+  // CONTROLS
+  // ============================================
+  function setMode(m) {
+    if (running) { alert('Stop the current test before switching modes.'); return; }
+    mode = m;
+    document.getElementById('modeDemo').classList.toggle('active', m === 'demo');
+    document.getElementById('modeLive').classList.toggle('active', m === 'live');
+    document.getElementById('statusText').textContent = m === 'demo' ? 'Demo Mode' : 'Disconnected';
+    document.getElementById('statusDot').className = 'status-dot ' + (m === 'demo' ? 'demo' : '');
+    document.getElementById('setupTip').style.display = m === 'demo' ? 'flex' : 'none';
+  }
+
+  // ============================================
+  // WEB SERIAL — connect to real GP:50
+  // ============================================
+  async function connectTransducer() {
+    if (!('serial' in navigator)) {
+      alert('Web Serial not supported. Use Chrome or Edge browser.');
+      return;
+    }
+    try {
+      serialPort = await navigator.serial.requestPort();
+      await serialPort.open({ baudRate: 9600 }); // common default; tune if needed
+      document.getElementById('statusDot').className = 'status-dot connected';
+      document.getElementById('statusText').textContent = 'GP:50 Connected';
+      document.getElementById('modeLive').classList.add('active');
+      document.getElementById('modeDemo').classList.remove('active');
+      mode = 'live';
+      document.getElementById('setupTip').style.display = 'none';
+    } catch (e) {
+      alert('Could not connect: ' + e.message);
+    }
+  }
+
+  async function readSerialLoop() {
+    const decoder = new TextDecoderStream();
+    serialPort.readable.pipeTo(decoder.writable);
+    serialReader = decoder.readable.getReader();
+    let buffer = '';
+    while (running) {
+      const { value, done } = await serialReader.read();
+      if (done) break;
+      buffer += value;
+      const lines = buffer.split(/\r?\n/);
+      buffer = lines.pop();
+      for (const line of lines) {
+        const psi = parseFloat(line.trim());
+        if (!isNaN(psi)) addSample(psi);
+      }
+    }
+  }
+
+  // ============================================
+  // DEMO — simulate a realistic 15K test
+  // ============================================
+  function demoLoop() {
+    if (!running) return;
+    const elapsed = (Date.now() - testStartTime) / 1000;
+    let psi;
+    // Ramp 0 → target in 25 sec
+    if (elapsed < 25) {
+      psi = (elapsed / 25) * TEST_TARGET + (Math.random() * 60 - 30);
+      currentStage = 1;
+    }
+    // Hold at target for HOLD_DURATION_S
+    else if (elapsed < 25 + HOLD_DURATION_S) {
+      // Slight decay during hold (realistic)
+      const holdElapsed = elapsed - 25;
+      psi = TEST_TARGET - (holdElapsed * 0.15) + (Math.random() * 30 - 15);
+      currentStage = 2;
+    }
+    // Decay (release pressure)
+    else if (elapsed < 25 + HOLD_DURATION_S + 15) {
+      const decayElapsed = elapsed - 25 - HOLD_DURATION_S;
+      psi = TEST_TARGET * Math.exp(-decayElapsed * 0.3) + (Math.random() * 20 - 10);
+      currentStage = 3;
+    }
+    else {
+      currentStage = 4;
+      stopTest();
+      return;
+    }
+    addSample(Math.max(0, psi));
+    setTimeout(demoLoop, 100); // 10 Hz
+  }
+
+  // ============================================
+  // SAMPLE HANDLING
+  // ============================================
+  function addSample(psi) {
+    const t = (Date.now() - testStartTime) / 1000;
+    samples.push({ t, psi });
+
+    // Update chart (downsample if > 600 points)
+    const step = Math.max(1, Math.floor(samples.length / 600));
+    chart.data.labels = samples.filter((_, i) => i % step === 0).map(s => s.t.toFixed(0) + 's');
+    chart.data.datasets[0].data = samples.filter((_, i) => i % step === 0).map(s => s.psi);
+    chart.data.datasets[1].data = chart.data.labels.map(() => TEST_TARGET);
+    chart.update('none');
+
+    // Update gauges
+    const gauge = document.getElementById('currentPSI');
+    gauge.textContent = Math.round(psi).toLocaleString();
+    gauge.className = 'gauge-value ' + (psi > 23000 ? 'critical' : psi > 18000 ? 'high' : '');
+
+    const peak = Math.max(...samples.map(s => s.psi));
+    document.getElementById('peakPSI').textContent = Math.round(peak).toLocaleString();
+
+    // Hold stats
+    if (currentStage === 2 && holdStartIdx === 0) holdStartIdx = samples.length;
+    if (currentStage === 3 && holdEndIdx === 0) holdEndIdx = samples.length;
+
+    if (holdStartIdx > 0 && holdEndIdx > 0) {
+      const hold = samples.slice(holdStartIdx, holdEndIdx).map(s => s.psi);
+      const avg = hold.reduce((a, b) => a + b, 0) / hold.length;
+      const start = hold[0];
+      const end = hold[hold.length - 1];
+      document.getElementById('holdPSI').textContent = Math.round(avg).toLocaleString();
+      document.getElementById('decayPSI').textContent = Math.round(start - end) + ' PSI';
+    }
+
+    document.getElementById('duration').textContent = formatTime(t);
+    document.getElementById('sampleCount').textContent = samples.length + ' samples';
+
+    updateProtocolBar();
+  }
+
+  function updateProtocolBar() {
+    const steps = ['stageRamp', 'stageHold', 'stageDecay', 'stageDone'];
+    steps.forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.classList.remove('active', 'done');
+      if (currentStage > i + 1) el.classList.add('done');
+      if (currentStage === i + 1) el.classList.add('active');
+    });
+    if (currentStage === 4) {
+      const decay = samples.length > holdEndIdx ?
+        samples[holdStartIdx].psi - samples[holdEndIdx - 1].psi : 0;
+      const verdict = decay < HOLD_TOLERANCE ? '✓ PASS' : '✗ FAIL';
+      const el = document.getElementById('stageVerdict');
+      el.textContent = verdict;
+      el.style.color = decay < HOLD_TOLERANCE ? 'var(--success)' : 'var(--accent)';
+    }
+  }
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  // ============================================
+  // START / STOP / SAVE
+  // ============================================
+  function startTest() {
+    samples = [];
+    testStartTime = Date.now();
+    running = true;
+    currentStage = 1;
+    holdStartIdx = 0;
+    holdEndIdx = 0;
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    document.getElementById('saveBtn').disabled = true;
+    document.getElementById('chartSub').textContent = 'Test in progress...';
+    if (mode === 'demo') demoLoop();
+    else readSerialLoop();
+  }
+
+  function stopTest() {
+    running = false;
+    if (currentStage < 4) currentStage = 4;
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('chartSub').textContent = 'Test complete — review and save';
+    updateProtocolBar();
+  }
+
+  async function saveTest() {
+    const peak = Math.max(...samples.map(s => s.psi));
+    const holdSamples = samples.slice(holdStartIdx, holdEndIdx);
+    const holdAvg = holdSamples.length ? holdSamples.reduce((a, b) => a + b.psi, 0) / holdSamples.length : 0;
+    const decay = holdSamples.length ? holdSamples[0].psi - holdSamples[holdSamples.length - 1].psi : 0;
+    const passed = decay < HOLD_TOLERANCE && peak >= TEST_TARGET * 0.95;
+
+    const payload = {
+      asset_id: 'HB-411',
+      started_at: new Date(testStartTime).toISOString(),
+      ended_at: new Date().toISOString(),
+      peak_psi: Math.round(peak),
+      hold_avg_psi: Math.round(holdAvg),
+      decay_psi: Math.round(decay),
+      duration_seconds: Math.round((Date.now() - testStartTime) / 1000),
+      pass_fail: passed ? 'pass' : 'fail',
+      sample_count: samples.length,
+      samples: samples,
+      mode: mode,
+    };
+
+    alert(`Test saved!\n\nPeak: ${payload.peak_psi.toLocaleString()} PSI\nHold avg: ${payload.hold_avg_psi.toLocaleString()} PSI\nDecay: ${payload.decay_psi} PSI\nVerdict: ${payload.pass_fail.toUpperCase()}\n\n(In production, this writes to Supabase pressure_tests table)`);
+    console.log('Pressure test payload:', payload);
+  }
+</script>
+
+</body>
+</html>
